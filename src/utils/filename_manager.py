@@ -19,10 +19,10 @@ class FilenameManager:
                 "images": f"outputs/{cls._instance.base_folder}/images/",
                 "models": f"outputs/{cls._instance.base_folder}/models/"
             }
-            os.makedirs('outputs', exist_ok=True)
-            os.makedirs(f"outputs/{cls._instance.base_folder}", exist_ok=True)
-            os.makedirs(f"outputs/{cls._instance.base_folder}/images", exist_ok=True)
-            os.makedirs(f"outputs/{cls._instance.base_folder}/models", exist_ok=True)
+            os.makedirs('outputs/', exist_ok=True)
+            os.makedirs(f"outputs/{cls._instance.base_folder}/", exist_ok=True)
+            os.makedirs(f"outputs/{cls._instance.base_folder}/images/", exist_ok=True)
+            os.makedirs(f"outputs/{cls._instance.base_folder}/models/", exist_ok=True)
         return cls._instance
 
     def get_filename(self, key: str) -> str:
@@ -35,7 +35,7 @@ class FilenameManager:
 
 
     def generate_model_filename(self, epoch=None, batch_size=None, learning_rate=None, extension='pth'):
-        filename = self.get_filename('models') + '/model_weights_'
+        filename = self.get_filename('models') + 'model_weights_'
 
         if epoch is not None:
             filename += f"_epoch{epoch}"

@@ -6,6 +6,7 @@ import torch.optim as optim
 from src.evaluations.evaluator import Evaluator
 from src.utils.losses import crossentropy_loss
 from src.utils.filename_manager import FilenameManager
+from src.utils.results_writer import MetricsTracker
 
 class Trainer:
     def __init__(self, model, dataloader, config):
@@ -28,6 +29,7 @@ class Trainer:
 
         self.evaluation_metrics = Evaluator()
         self.log_file_path = FilenameManager().get_filename('training_log')
+        self.results_writer = MetricsTracker(self.log_file_path)
 
     def _initialize_optimizer(self):
         if self.optimizer_config == "adam":
@@ -42,24 +44,29 @@ class Trainer:
             raise ValueError(f"Unsupported loss function: {self.loss_function_config}")
 
     def train(self, val_loader):
+
         for epoch in range(1, self.num_epochs+1):
             print(f"Epoch [{epoch}/{self.num_epochs}]")
-            self.train_epoch(epoch=epoch)
-            self.validate_epoch(val_loader=val_loader)
 
-            model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='.pth')
+            train_loss, train_metrics = self.train_epoch(epoch=epoch)
+            val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
+
+            model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='.pth')            
             self.model.save_model(model_saved_path)
+            
+            self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
+            self.results_writer.save()
 
 
 
     def train_epoch(self, epoch):
+        self.evaluation_metrics.reset_metrics()
         self.model.train()
 
         running_loss = 0.0
 
         for batch, (images, genders, y)  in enumerate(self.dataloader):
             images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
-            print(batch, end=' ')
             if epoch == 1 and batch == 0:
                 print(f'{images.shape}, {genders.shape}, {y.shape}')
 
@@ -81,6 +88,8 @@ class Trainer:
         epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
         self.evaluation_metrics.print_metrics()
         self.evaluation_metrics.reset_metrics()
+
+        return epoch_loss, epoch_metrics
         
 
     def validate_epoch(self, val_loader):
@@ -102,9 +111,12 @@ class Trainer:
                 self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred, y_variance=var)
 
             
-        epoch_loss = running_loss / len(self.val_loader)
+        epoch_loss = running_loss / len(val_loader)
         print(f"Validation Loss: {epoch_loss:.4f}")
         epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
         print(f"Validation:\n")
         self.evaluation_metrics.print_metrics()
         self.evaluation_metrics.reset_metrics()
+
+        return epoch_loss, epoch_metrics
+

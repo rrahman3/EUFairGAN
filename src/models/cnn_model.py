@@ -65,13 +65,7 @@ class CNNModel(BaseModel): #input shape (None, 3, Px, Py)
         return x, variance
 
 
-    def save_model(self, epoch_no):
-        # model_save_path = utils.get_directory_to_save_file(
-        #                                         folder_name=celebAConfig.celeba_cnn_model_saved_folder, 
-        #                                         file_name=f"model_weights_{epoch_no:05d}.pth", 
-        #                                         type="models")
-        model_save_path = "outputs/cnn_model_weights.pth"
-        # image_save_path = utils.get_directory_to_save_file(folder_name="VanilaCNN", file_name="", type="images")
-        super().save_model(model_save_path)
+    def save_model(self, model_saved_path):
+        super().save_model(model_saved_path)
 
 
