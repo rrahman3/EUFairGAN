@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from src.evaluations.evaluator import Evaluator
 from src.utils.losses import crossentropy_loss
+from src.utils.filename_manager import FilenameManager
 
 class Trainer:
     def __init__(self, model, dataloader, config):
@@ -26,6 +27,7 @@ class Trainer:
         self.loss_function = self._initialize_loss_function()
 
         self.evaluation_metrics = Evaluator()
+        self.log_file_path = FilenameManager().get_filename('training_log')
 
     def _initialize_optimizer(self):
         if self.optimizer_config == "adam":
@@ -39,47 +41,46 @@ class Trainer:
         else:
             raise ValueError(f"Unsupported loss function: {self.loss_function_config}")
 
-    def train(self):
-        for epoch in range(1, self.num_epochs):
-            print(f"Epoch {epoch}/{self.num_epochs}")
-            self.train_epoch()
-            self.validate_epoch()
+    def train(self, val_loader):
+        for epoch in range(1, self.num_epochs+1):
+            print(f"Epoch [{epoch}/{self.num_epochs}]")
+            self.train_epoch(epoch=epoch)
+            self.validate_epoch(val_loader=val_loader)
 
-            self.model.save_model()
+            model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='.pth')
+            self.model.save_model(model_saved_path)
 
 
 
-    def train_epoch(self):
+    def train_epoch(self, epoch):
         self.model.train()
 
-        for epoch in range(1, self.num_epochs):
-            print(f"Epoch [{epoch}/{self.num_epochs}]")
-            running_loss = 0.0
+        running_loss = 0.0
 
-            for batch, (images, genders, y)  in enumerate(self.dataloader):
-                images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
-                print(batch, end=' ')
-                if epoch == 1 and batch == 0:
-                    print(f'{images.shape}, {genders.shape}, {y.shape}')
+        for batch, (images, genders, y)  in enumerate(self.dataloader):
+            images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
+            print(batch, end=' ')
+            if epoch == 1 and batch == 0:
+                print(f'{images.shape}, {genders.shape}, {y.shape}')
 
-                self.model.train()
-                self.optimizer.zero_grad()
+            self.model.train()
+            self.optimizer.zero_grad()
 
-                # Compute prediction and loss
-                pred, var = self.model(images, genders)
-                loss = self.loss_function(y, pred, var)
-                running_loss += loss.item()
+            # Compute prediction and loss
+            pred, var = self.model(images, genders)
+            loss = self.loss_function(y, pred, var)
+            running_loss += loss.item()
 
-                # Backpropagation
-                loss.backward()
-                self.optimizer.step()
-                self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred, y_variance=var)
-            
-            epoch_loss = running_loss / self.num_samples
-            print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
-            epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
-            self.evaluation_metrics.print_metrics()
-            self.evaluation_metrics.reset_metrics()
+            # Backpropagation
+            loss.backward()
+            self.optimizer.step()
+            self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred, y_variance=var)
+        
+        epoch_loss = running_loss / self.num_samples
+        print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
+        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        self.evaluation_metrics.print_metrics()
+        self.evaluation_metrics.reset_metrics()
         
 
     def validate_epoch(self, val_loader):

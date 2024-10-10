@@ -6,6 +6,8 @@ from src.training.trainer import Trainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory
+from src.utils.filename_manager import FilenameManager
+
 
 def main(model_name, dataset_name):
     # Load configuration files
@@ -13,6 +15,8 @@ def main(model_name, dataset_name):
     datasets_config = configs['datasets']
     models_config = configs['models']
     config = configs['project']
+
+    file_manger = FilenameManager(model_name=model_name, dataset_name=dataset_name, task_name='train_bnn')
 
     # Device configuration (GPU or CPU)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -49,7 +53,7 @@ def main(model_name, dataset_name):
     )
 
     # Train the model
-    trainer.train_epoch()
+    trainer.train(val_loader)
     
 
 if __name__ == "__main__":

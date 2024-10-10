@@ -22,3 +22,6 @@ def crossentropy_loss(y_true, y_pred, y_var):
     # std_samples = torch.normal(mean=0.0, std=std_dev.expand_as(y_pred))
     # distorted_loss = F.cross_entropy(y_pred, y_true + std_samples, reduction='mean')
     # return torch.exp(distorted_loss)
+
+
+

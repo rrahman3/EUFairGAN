@@ -3,8 +3,8 @@ datasets:
     train:
       metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_train_images_location.csv"
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
-      frac: 0.25
-      batch_size: 64
+      frac: 0.05
+      batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
