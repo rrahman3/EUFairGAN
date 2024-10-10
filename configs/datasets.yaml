@@ -1,0 +1,51 @@
+datasets:
+  UTKFace:
+    train:
+      metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_train_images_location.csv"
+      img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
+      frac: 0.25
+      batch_size: 64
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+    val:
+      metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_validation_images_location.csv"
+      img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
+      frac: 1.00
+      batch_size: 32
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+    test:
+      metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_test_images_location.csv"
+      img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
+      frac: 1.00
+      batch_size: 32
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+
+  CelebA:
+    train:
+      metadata_file: "../AUFairGAN/data/celebA/celeba_train.csv"
+      img_dir: "../AUFairGAN/data/celebA/img_align_celeba/"
+      frac: 1.00
+      batch_size: 32
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+    val:
+      metadata_file: "../AUFairGAN/data/celebA/celeba_val.csv"
+      img_dir: "../AUFairGAN/data/celebA/img_align_celeba/"
+      frac: 1.00
+      batch_size: 32
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+    test:
+      metadata_file: "../AUFairGAN/data/celebA/celeba_test.csv"
+      img_dir: "../AUFairGAN/data/celebA/img_align_celeba/"
+      frac: 1.00
+      batch_size: 32
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+
+  MIMIC-III:
+    metadata_file: './data/dataset2/labels.csv'
+    img_dir: './data/dataset2/images'
+    batch_size: 64

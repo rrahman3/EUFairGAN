@@ -1,0 +1,16 @@
+# configs/config.yaml
+
+project:
+  name: "Epistemic Uncertainty Project"
+  description: "Ruhani's PhD Dissertation project on EUFairGAN."
+
+dataloader:
+  batch_size: 32
+  shuffle: true
+  num_workers: 4  # Number of subprocesses for data loading
+
+training:
+  learning_rate: 0.001
+  num_epochs: 100
+  optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
+  loss_function: "cross_entropy"  # Specify the loss function

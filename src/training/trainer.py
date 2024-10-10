@@ -1,0 +1,109 @@
+# trainer.py
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from src.evaluations.evaluator import Evaluator
+from src.utils.losses import crossentropy_loss
+
+class Trainer:
+    def __init__(self, model, dataloader, config):
+        self.model = model
+        self.dataloader = dataloader
+        self.num_samples = len(self.dataloader.dataset)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
+
+        # Load configuration settings
+        self.training_config = config['training']
+        self.optimizer_config = self.training_config['optimizer']
+        self.learning_rate = self.training_config['learning_rate']
+        self.loss_function_config = self.training_config['loss_function']
+        self.num_epochs = self.training_config['num_epochs']
+
+        # Initialize optimizer and loss function
+        self.optimizer = self._initialize_optimizer()
+        self.loss_function = self._initialize_loss_function()
+
+        self.evaluation_metrics = Evaluator()
+
+    def _initialize_optimizer(self):
+        if self.optimizer_config == "adam":
+            return optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        else:
+            raise ValueError(f"Unsupported optimizer: {self.optimizer_config}")
+
+    def _initialize_loss_function(self):
+        if self.loss_function_config == "cross_entropy":
+            return crossentropy_loss
+        else:
+            raise ValueError(f"Unsupported loss function: {self.loss_function_config}")
+
+    def train(self):
+        for epoch in range(1, self.num_epochs):
+            print(f"Epoch {epoch}/{self.num_epochs}")
+            self.train_epoch()
+            self.validate_epoch()
+
+            self.model.save_model()
+
+
+
+    def train_epoch(self):
+        self.model.train()
+
+        for epoch in range(1, self.num_epochs):
+            print(f"Epoch [{epoch}/{self.num_epochs}]")
+            running_loss = 0.0
+
+            for batch, (images, genders, y)  in enumerate(self.dataloader):
+                images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
+                print(batch, end=' ')
+                if epoch == 1 and batch == 0:
+                    print(f'{images.shape}, {genders.shape}, {y.shape}')
+
+                self.model.train()
+                self.optimizer.zero_grad()
+
+                # Compute prediction and loss
+                pred, var = self.model(images, genders)
+                loss = self.loss_function(y, pred, var)
+                running_loss += loss.item()
+
+                # Backpropagation
+                loss.backward()
+                self.optimizer.step()
+                self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred, y_variance=var)
+            
+            epoch_loss = running_loss / self.num_samples
+            print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
+            epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+            self.evaluation_metrics.print_metrics()
+            self.evaluation_metrics.reset_metrics()
+        
+
+    def validate_epoch(self, val_loader):
+        self.model.eval()
+        self.evaluation_metrics.reset_metrics()
+
+        running_loss = 0.0
+        with torch.no_grad():
+            for batch, (images, genders, y)  in enumerate(val_loader):
+                images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
+                if batch == 0:
+                    print(f'{images.shape}, {genders.shape}, {y.shape}')
+
+                # Compute prediction and loss
+                pred, var = self.model(images, genders)
+                loss = self.loss_function(y, pred, var)
+                running_loss += loss.item()
+
+                self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred, y_variance=var)
+
+            
+        epoch_loss = running_loss / len(self.val_loader)
+        print(f"Validation Loss: {epoch_loss:.4f}")
+        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        print(f"Validation:\n")
+        self.evaluation_metrics.print_metrics()
+        self.evaluation_metrics.reset_metrics()

@@ -1,0 +1,10 @@
+# Ignore directories
+data/
+logs/
+.vscode/
+
+# Ignore operating system files
+EUFairGAN.code-workspace
+
+# Ignore Python cache and virtual environments
+**/__pycache__/
