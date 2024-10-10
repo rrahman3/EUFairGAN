@@ -1,11 +1,11 @@
 import argparse
 import torch
-from src.data.celeba_loader import CelebADataset
+from src.dataloader.celeba_loader import CelebADataset
 from src.models.cnn_model import CNNModel
 from src.training.trainer import Trainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
-from src.data.dataloader_factory import dataloader_factory
+from src.dataloader.dataloader_factory import dataloader_factory
 
 def main(model_name, dataset_name):
     # Load configuration files
@@ -60,3 +60,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args.model, args.dataset)
+
+
+# Git Token
+# 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
