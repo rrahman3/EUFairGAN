@@ -13,8 +13,7 @@ class FilenameManager:
             cls._instance.base_folder = f"{task_name}_{model_name}_{dataset_name}_{cls._instance.timestamp}"
             # Initialize with default filenames and directories
             cls._instance.filenames = {
-                "training_log": f"outputs/{cls._instance.base_folder}/training_log.csv",
-                "validation_log": f"outputs/{cls._instance.base_folder}/validation_log.csv",
+                "training_log": f"outputs/{cls._instance.base_folder}/training_log_{task_name}_{dataset_name}_{cls._instance.timestamp}.csv",
                 "evaluation_log": f"outputs/{cls._instance.base_folder}/evaluations.csv",
                 "images": f"outputs/{cls._instance.base_folder}/images/",
                 "models": f"outputs/{cls._instance.base_folder}/models/"
@@ -35,7 +34,7 @@ class FilenameManager:
 
 
     def generate_model_filename(self, epoch=None, batch_size=None, learning_rate=None, extension='pth'):
-        filename = self.get_filename('models') + 'model_weights_'
+        filename = self.get_filename('models') + 'model_weights'
 
         if epoch is not None:
             filename += f"_epoch{epoch}"

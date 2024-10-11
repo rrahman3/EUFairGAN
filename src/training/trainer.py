@@ -51,9 +51,9 @@ class Trainer:
             train_loss, train_metrics = self.train_epoch(epoch=epoch)
             val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
 
-            model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='.pth')            
+            model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
             self.model.save_model(model_saved_path)
-            
+
             self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
             self.results_writer.save()
 

@@ -14,6 +14,8 @@ def main(args):
     model_name = args.model
     task_name = args.task
     task_config_name = args.task_config
+    file_manger = FilenameManager(model_name=model_name, dataset_name=dataset_name, task_name=task_name)
+
 
     # Load configuration files
     configs = ConfigReader().load_all_configs()
@@ -48,6 +50,7 @@ def main(args):
     model = model.to(device)
     
     if task_name == 'train_bnn':
+
         # Initialize Trainer
         print(f"Training {model_name} on {dataset_name}...")
         trainer = Trainer(
@@ -85,9 +88,6 @@ if __name__ == "__main__":
     parser.add_argument('--task_config', default='celeba_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
-    file_manger = FilenameManager(model_name=args.model, dataset_name=args.dataset, task_name=args.task)
-
-
     main(args)
 
 

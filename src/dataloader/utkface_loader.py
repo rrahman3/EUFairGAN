@@ -27,7 +27,7 @@ class UTKFaceDataset(Dataset):
             img_name = os.path.join(self.image_dir, self.metadata.filename[idx])
             image = Image.open(img_name).convert('RGB')
 
-            lr_image = self._process_raw_image(image, (64, 64))
+            lr_image = self._process_raw_image(image, self.image_dim)
             hr_image = self._process_raw_image(image, (128, 128))
 
             gender = np.array([self.metadata.Gender[idx]]).astype(np.float32)

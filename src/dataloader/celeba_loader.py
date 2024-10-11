@@ -17,6 +17,7 @@ class CelebADataset(CustomDataset):
             self.metadata = self.metadata.sample(frac=frac, random_state=42).reset_index(drop=True)
         self.image_dim = image_dim
         print(len(self.metadata))
+        self.model_input_image_dim = (128, 128)
 
     def __len__(self):
         return len(self.metadata)
@@ -36,9 +37,11 @@ class CelebADataset(CustomDataset):
                 }
         
         return sample['lr_image'], sample['gender'], sample['y_label']
-
+    
     def _process_raw_image(self, img, image_dim):
         img = img.resize(image_dim)
+        if image_dim != self.model_input_image_dim:
+            img = img.resize(self.model_input_image_dim)
         temp = np.array(img.copy())
         temp = temp/255.0
         temp = temp.transpose((2, 0, 1))

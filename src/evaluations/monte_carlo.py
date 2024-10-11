@@ -12,6 +12,17 @@ class MonteCarloPrediction:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.evaluation_metrics = MonteCarloEvaluator()
 
+    def get_prediction(self, images, genders):
+        y_pred, y_var = self.model(images, genders)
+
+        y_pred = y_pred.detach().cpu().numpy()
+        y_pred = y_pred[:, np.newaxis, :]
+
+        y_var = y_var.detach().cpu().numpy()
+        y_var = y_var[:, np.newaxis, :]
+
+        return y_pred, y_var
+
 
     def asfsdgd(self):
         with torch.no_grad():
@@ -22,42 +33,24 @@ class MonteCarloPrediction:
                     print(f'{images.shape}, {genders.shape}, {y.shape}')
 
                 # Compute prediction and loss
-                y_pred_N = np.empty((images.shape[0], self.N, y.shape[-1]))
+                y_pred_N = np.empty((images.shape[0], self.N, y.shape[-1])) #(batch_size, N, num_classes)
                 y_var_N = np.empty((images.shape[0], self.N, 1))
                 for i in range(1, self.N+1):
-                    # print(i)
-                    y_pred, y_var = self.model(images, genders)
-                    # print(y_pred)
-                    y_pred = y_pred.detach().cpu().numpy()
-                    y_pred = y_pred[:, np.newaxis, :]
-                    # print(y_pred)
-                    y_var = y_var.detach().cpu().numpy()
-                    y_var = y_var[:, np.newaxis, :]
+                    y_pred, y_var = self.get_prediction(images=images, genders=genders) #(batch_size, 1, num_classes)
 
                     # Store the predictions and variances at the current iteration index (i-1)
                     y_pred_N[:, i - 1, :] = y_pred[:, 0, :]  # Using [0] to get rid of the added dimension
                     y_var_N[:, i - 1, :] = y_var[:, 0, :]
-                    # print(y_pred.shape, y_var.shape)
-                    # print(y_pred_N.shape, y_var_N.shape)
-                    # print(len(y_pred_N), len(y_var_N))
-                    # if i==1:
-                    # print(y_pred_N[0])
-                    # print(y_var_N)
-                # y_pred_N = (batch_size, N, num_classes)
 
                 y_pred_mean = np.mean(np.array(y_pred_N), axis=1) #(batch, num_classes)
-                y_var_mean = np.mean(np.array(y_var_N), axis=1) #(batch, 1)
-                # print(y_pred_mean.shape, y_var_mean.shape)
-                # print(y_pred_mean[0])
                 y_pred_softmax = softmax(y_pred_mean, axis=1)
-                # print(y_pred_softmax.shape)
-                # print(np.sum(y_pred_softmax, axis=1))
+
+                y_var_mean = np.mean(np.array(y_var_N), axis=1) #(batch, 1)
+
                 epistemic_uncertainty = np.apply_along_axis(self.predictive_entropy, axis=1, arr=y_pred_softmax) #(batch_size, 1), epistemic uncertainty of each user
                 aleatoric_uncertainty = y_var_mean #(batch, 1)
-                # print(epistemic_uncertainty.shape, np.mean(epistemic_uncertainty), epistemic_uncertainty)
-                # print(aleatoric_uncertainty.shape, np.mean(aleatoric_uncertainty), aleatoric_uncertainty)
-                # print(prediction_variances.shape)
 
+                # update evaluation metrics
                 self.evaluation_metrics.update_metrics(y_true=y, y_pred=y_pred_softmax)
                 self.evaluation_metrics.update_variance(variance=aleatoric_uncertainty)
                 self.evaluation_metrics.update_entropy(entropy=epistemic_uncertainty)
