@@ -14,7 +14,8 @@ class UTKFaceDataset(Dataset):
         if frac is not None:
             self.metadata = self.metadata.sample(frac=frac, random_state=42).reset_index(drop=True)
         self.image_dim = image_dim
-        print(len(self.metadata))
+        # print(len(self.metadata))
+        self.model_input_image_dim = (128, 128)
 
 
     def __len__(self):
@@ -27,7 +28,7 @@ class UTKFaceDataset(Dataset):
             image = Image.open(img_name).convert('RGB')
 
             lr_image = self._process_raw_image(image, (64, 64))
-            hr_image = self._process_raw_image(image, (128, 128))
+            hr_image = self._process_raw_image(lr_image, (128, 128))
 
             gender = np.array([self.metadata.Gender[idx]]).astype(np.float32)
             race =  np.array([self.metadata.Race[idx]]).astype(np.float32)
@@ -66,12 +67,12 @@ class UTKFaceDataset(Dataset):
         
     def _process_raw_image(self, img, image_dim):
         img = img.resize(image_dim)
+        # if image_dim != self.model_input_image_dim:
+        #     img = img.resize(self.model_input_image_dim)
         temp = np.array(img.copy())
         temp = temp/255.0
         temp = temp.transpose((2, 0, 1))
         temp = torch.tensor(np.array(temp)).float()
-        return temp
-
 
     def _process_csv(self):
         metadata = pd.read_csv(self.metadata_file, nrows=None)
