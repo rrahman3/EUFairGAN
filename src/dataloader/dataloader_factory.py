@@ -7,14 +7,14 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
         dataset = UTKFaceDataset(
             metadata_file=config[split]['metadata_file'],
             image_dir=config[split]['img_dir'],
-            image_dim=config[split]['img_dim'],
+            image_dim=eval(config[split]['img_dim']),
             frac=config[split]['frac']
         )
     elif dataset_name == "CelebA":
         dataset = CelebADataset(
             metadata_file=config[split]['metadata_file'],
             image_dir=config[split]['img_dir'],
-            image_dim=config[split]['img_dim'],
+            image_dim=eval(config[split]['img_dim']),
             frac=config[split]['frac']
         )
     else:

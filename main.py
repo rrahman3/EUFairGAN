@@ -29,6 +29,8 @@ def main(args):
     print(f"Initializing DataLoader for {dataset_name}...")
     # Initialize DataLoader for the specified dataset
     dataset_info = datasets_config['datasets'].get(dataset_name)
+    print(dataset_info)
+    print(dataset_info['train']['img_dim'])
     if dataset_info is None:
         raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
     
@@ -85,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', default='utkface_cnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--dataset', default='UTKFace', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
     parser.add_argument('--task', default='test_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--task_config', default='celeba_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--task_config', default='utkface_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
     main(args)
