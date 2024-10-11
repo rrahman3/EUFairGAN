@@ -10,6 +10,15 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
             image_dim=eval(config[split]['img_dim']),
             frac=config[split]['frac']
         )
+        if split == 'test':
+            print(config[split]['groups'])
+            print(type(config[split]['groups']))
+            groups = config[split]['groups']
+            if groups[0] == "male" or groups[0] =="female":
+                dataset = dataset.filter_by_gender(groups[group])
+            elif groups[0] == "black" or groups[0] =="white":
+                dataset = dataset.filter_by_race(groups[group])
+
     elif dataset_name == "CelebA":
         dataset = CelebADataset(
             metadata_file=config[split]['metadata_file'],
@@ -17,11 +26,13 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
             image_dim=eval(config[split]['img_dim']),
             frac=config[split]['frac']
         )
+        if split == 'test':
+            groups = config[split]['groups']
+            if groups[0] == "male" or groups[0] =="female":
+                dataset = dataset.filter_by_gender(groups[group])
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
 
-    if group is not None:
-        dataset = dataset.filter_by_gender(group)
 
     dataloader = DataLoader(
         dataset,

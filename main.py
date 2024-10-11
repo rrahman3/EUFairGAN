@@ -37,8 +37,9 @@ def main(args):
     # Create the DataLoaders for train, validation, and test splits
     train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
     val_loader = dataloader_factory(dataset_name, 'val', dataset_info)
-    male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group='male')
-    female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group='female')
+
+    male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
+    female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
 
     # Get model info
     model_info = models_config['models'].get(model_name)

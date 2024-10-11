@@ -24,6 +24,7 @@ datasets:
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
+      groups: ['male', 'female']
 
   CelebA:
     train:
