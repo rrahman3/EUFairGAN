@@ -34,16 +34,16 @@ class MetricsTracker:
     def save(self):
         new_data = pd.DataFrame(self.metrics)
 
-        # Check if the file exists
-        if os.path.exists(self.metrics_file):
-            # If the file exists, read it into a DataFrame
-            existing_data = pd.read_csv(self.metrics_file)
+        # # Check if the file exists
+        # if os.path.exists(self.metrics_file):
+        #     # If the file exists, read it into a DataFrame
+        #     existing_data = pd.read_csv(self.metrics_file)
 
-            # Append the new data to the existing data
-            combined_data = pd.concat([existing_data, new_data], ignore_index=True)
-        else:
-            # If the file does not exist, use the new data as is
-            combined_data = new_data
+        #     # Append the new data to the existing data
+        #     combined_data = pd.concat([existing_data, new_data], ignore_index=True)
+        # else:
+        #     # If the file does not exist, use the new data as is
+        combined_data = new_data
 
         # Save the combined data back to the CSV file
         combined_data.to_csv(self.metrics_file, index=False)
