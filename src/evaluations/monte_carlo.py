@@ -99,14 +99,14 @@ class MonteCarloEvaluator:
 
     def update_metrics(self, y_true, y_pred): # y_ture is the binary form of the y_true (None, 1, num_classes) # [[0, 0, 1, 0]] (1, 1, 4)
 
-        _, y_pred_argmax = torch.max(y_pred, 1)
-        _, y_true_argmax = torch.max(y_true, 1)
+        y_pred_argmax = np.argmax(y_pred, axis=1)
+        y_true_argmax = np.argmax(y_true, axis=1)
 
-        self.all_labels_direct.extend(y_true_argmax.cpu().numpy())
-        self.all_predictions_driect.extend(y_pred_argmax.cpu().numpy())
+        self.all_labels_direct.extend(y_true_argmax)
+        self.all_predictions_driect.extend(y_pred_argmax)
 
-        self.all_labels_binary.extend(y_true.detach().cpu().numpy())
-        self.all_predictions_probabilities.extend(y_pred.detach().cpu().numpy())
+        self.all_labels_binary.extend(y_true)
+        self.all_predictions_probabilities.extend(y_pred)
     
     def update_variance(self, variance):
         self.all_varience.extend(variance)
