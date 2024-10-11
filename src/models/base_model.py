@@ -14,5 +14,5 @@ class BaseModel(ABC, nn.Module):
 
     def load_model(self, path: str):
         """Load model from a file."""
-        self.load_state_dict(torch.load(path))
+        self.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
         print(f"Model loaded from {path}")

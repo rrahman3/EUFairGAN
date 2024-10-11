@@ -7,16 +7,14 @@ from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory
 from src.utils.filename_manager import FilenameManager
+from src.evaluations.monte_carlo import MonteCarloPrediction
 
-
-def main(model_name, dataset_name):
+def main(model_name, dataset_name, task_name):
     # Load configuration files
     configs = ConfigReader().load_all_configs()
     datasets_config = configs['datasets']
     models_config = configs['models']
     config = configs['project']
-
-    file_manger = FilenameManager(model_name=model_name, dataset_name=dataset_name, task_name='train_bnn')
 
     # Device configuration (GPU or CPU)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -43,17 +41,32 @@ def main(model_name, dataset_name):
     model_class = globals()[model_info['model_class']]  # Dynamically load class
     model = model_class(output_class=model_info['params']['num_classes'])
     model = model.to(device)
+    
+    if task_name == 'train_bnn':
+        # Initialize Trainer
+        print(f"Training {model_name} on {dataset_name}...")
+        trainer = Trainer(
+            model=model,
+            dataloader=train_loader,
+            config=config
+        )
 
-    # Initialize Trainer
-    print(f"Training {model_name} on {dataset_name}...")
-    trainer = Trainer(
-        model=model,
-        dataloader=train_loader,
-        config=config
-    )
+        # Train the model
+        trainer.train(val_loader)
 
-    # Train the model
-    trainer.train(val_loader)
+    elif task_name == 'test_bnn':
+    #     pass
+
+    # elif task_name == 'test_bnn_eu':
+        model_saved_location = config['test_bnn']['bnn_model_location']
+        model.load_model(model_saved_location)
+        print('Male test')
+        male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader)
+        male_monte_carlo.asfsdgd()
+        print('Female test')
+        female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader)
+        female_monte_carlo.asfsdgd()
+
     
 
 if __name__ == "__main__":
@@ -61,9 +74,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
     parser.add_argument('--model', default='utkface_cnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--dataset', default='UTKFace', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    parser.add_argument('--task', default='test_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
-    main(args.model, args.dataset)
+    file_manger = FilenameManager(model_name=args.model, dataset_name=args.dataset, task_name=args.task)
+
+
+    main(args.model, args.dataset, args.task)
 
 
 # Git Token

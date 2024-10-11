@@ -14,3 +14,8 @@ training:
   num_epochs: 100
   optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
   loss_function: "cross_entropy"  # Specify the loss function
+
+test_bnn:
+  bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20241010_200858/models/model_weights__epoch50_lr0.001_20241010_200858..pth'
+  model_class: 'CNNModel'
+  dataset: 'utkface'

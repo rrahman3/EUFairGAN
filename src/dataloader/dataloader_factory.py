@@ -27,4 +27,5 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
         shuffle=config[split]['shuffle'],
         num_workers=config[split]['num_workers']
     )
+    print(f"Total samples in this dataloader: {len(dataloader.dataset)}")
     return dataloader

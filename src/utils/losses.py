@@ -13,7 +13,7 @@ def crossentropy_loss(y_true, y_pred, y_var):
     # print(f'loss: {y_true.dtype}, {y_pred.dtype}, {y_var.dtype}')
     std_dev = torch.sqrt(y_var)
     
-    losses = [cross_entropy(y_true, y_pred, std_dev) for _ in range(10)]
+    losses = [cross_entropy(y_true, y_pred, std_dev) for _ in range(100)]
     variance_loss = torch.mean(torch.stack(losses), dim=0)
     # print(variance_loss)
     # return torch.mean(variance_loss)
