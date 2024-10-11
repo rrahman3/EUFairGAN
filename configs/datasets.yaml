@@ -24,22 +24,22 @@ datasets:
 
   CelebA:
     train:
-      metadata_file: "../AUFairGAN/data/celebA/celeba_train.csv"
-      img_dir: "../AUFairGAN/data/celebA/img_align_celeba/"
+      metadata_file: "../AUFairGAN/data/celeba/celeba_train.csv"
+      img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
-      metadata_file: "../AUFairGAN/data/celebA/celeba_val.csv"
-      img_dir: "../AUFairGAN/data/celebA/img_align_celeba/"
+      metadata_file: "../AUFairGAN/data/celeba/celeba_val.csv"
+      img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
-      metadata_file: "../AUFairGAN/data/celebA/celeba_test.csv"
-      img_dir: "../AUFairGAN/data/celebA/img_align_celeba/"
+      metadata_file: "../AUFairGAN/data/celeba/celeba_test.csv"
+      img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
       batch_size: 32
       shuffle: True

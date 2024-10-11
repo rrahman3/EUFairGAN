@@ -16,6 +16,24 @@ training:
   loss_function: "cross_entropy"  # Specify the loss function
 
 test_bnn:
-  bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20241010_200858/models/model_weights__epoch50_lr0.001_20241010_200858..pth'
-  model_class: 'CNNModel'
-  dataset: 'utkface'
+  utkface_gender:
+    desc: 'Dataset: UTKFace, Model: CNNModel, Task: Age Prediction, Outclass: 3, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 14K'
+    bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20241010_200858/models/model_weights__epoch50_lr0.001_20241010_200858..pth'
+    dataset: 'UTKFace'
+    model_class: 'CNNModel'
+    hyperparameters:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      optimizer: 'adam'
+
+  celeba_gender:
+    desc: 'Dataset: CelebA, Model: CNNModel, Task: Smiling or Not, Outclass: 2, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 144K'
+    bnn_model_location: 'outputs/train_bnn_celeba_cnn_CelebA_20241011_005353/models/model_weights__epoch10_lr0.001_20241011_005353..pth'
+    dataset: 'UTKFace'
+    model_class: 'CNNModel'
+    hyperparameters:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      optimizer: 'adam'

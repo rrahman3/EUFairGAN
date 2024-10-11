@@ -9,7 +9,12 @@ from src.dataloader.dataloader_factory import dataloader_factory
 from src.utils.filename_manager import FilenameManager
 from src.evaluations.monte_carlo import MonteCarloPrediction
 
-def main(model_name, dataset_name, task_name):
+def main(args):
+    dataset_name = args.dataset
+    model_name = args.model
+    task_name = args.task
+    task_config_name = args.task_config
+
     # Load configuration files
     configs = ConfigReader().load_all_configs()
     datasets_config = configs['datasets']
@@ -55,14 +60,16 @@ def main(model_name, dataset_name, task_name):
         trainer.train(val_loader)
 
     elif task_name == 'test_bnn':
-    #     pass
+        task_config = config[task_name][task_config_name]
+        print(task_config)
 
-    # elif task_name == 'test_bnn_eu':
-        model_saved_location = config['test_bnn']['bnn_model_location']
-        model.load_model(model_saved_location)
+        model_saved_location = task_config['bnn_model_location']
+        model.load_model(model_saved_location)        
+
         print('Male test')
         male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader)
         male_monte_carlo.asfsdgd()
+
         print('Female test')
         female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader)
         female_monte_carlo.asfsdgd()
@@ -75,12 +82,13 @@ if __name__ == "__main__":
     parser.add_argument('--model', default='utkface_cnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--dataset', default='UTKFace', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
     parser.add_argument('--task', default='test_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--task_config', default='celeba_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
     file_manger = FilenameManager(model_name=args.model, dataset_name=args.dataset, task_name=args.task)
 
 
-    main(args.model, args.dataset, args.task)
+    main(args)
 
 
 # Git Token
