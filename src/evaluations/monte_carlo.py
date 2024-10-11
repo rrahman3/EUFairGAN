@@ -5,7 +5,7 @@ from scipy.special import softmax
 
 epsilon = 0.000001
 class MonteCarloPrediction:
-    def __init__(self, model, dataloader, N=10):
+    def __init__(self, model, dataloader, N=100):
         self.model = model
         self.dataloader = dataloader
         self.N = N
