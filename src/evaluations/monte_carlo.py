@@ -98,10 +98,11 @@ class MonteCarloEvaluator:
         self.all_entropy = []
 
     def update_metrics(self, y_true, y_pred): # y_ture is the binary form of the y_true (None, 1, num_classes) # [[0, 0, 1, 0]] (1, 1, 4)
-
-        y_pred_argmax = np.argmax(y_pred, axis=1)
+        if isinstance(y_true, torch.Tensor):
+            y_true = y_true.cpu().numpy()
         y_true_argmax = np.argmax(y_true, axis=1)
-
+        y_pred_argmax = np.argmax(y_pred, axis=1)
+        
         self.all_labels_direct.extend(y_true_argmax)
         self.all_predictions_driect.extend(y_pred_argmax)
 
