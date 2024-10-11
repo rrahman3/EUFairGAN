@@ -28,7 +28,7 @@ class UTKFaceDataset(Dataset):
             image = Image.open(img_name).convert('RGB')
 
             lr_image = self._process_raw_image(image, (64, 64))
-            # hr_image = self._process_raw_image(image, (128, 128))
+            hr_image = self._process_raw_image(image, (128, 128))
 
             gender = np.array([self.metadata.Gender[idx]]).astype(np.float32)
             race =  np.array([self.metadata.Race[idx]]).astype(np.float32)
@@ -38,7 +38,7 @@ class UTKFaceDataset(Dataset):
             sample = {
                         # 'image': image, 
                         'lr_image': lr_image,
-                        # 'hr_image': hr_image,
+                        'hr_image': hr_image,
                         'gender': gender, 
                         'race': race, 
                         'age_classification': age_classification, 
@@ -73,6 +73,7 @@ class UTKFaceDataset(Dataset):
         temp = temp/255.0
         temp = temp.transpose((2, 0, 1))
         temp = torch.tensor(np.array(temp)).float()
+        return temp
 
     def _process_csv(self):
         metadata = pd.read_csv(self.metadata_file, nrows=None)
