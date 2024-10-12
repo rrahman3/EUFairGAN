@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
+from src.models.base_model import BaseModel
 
 # Define Vision Transformer model
-class ViT(nn.Module):
+class ViT(BaseModel):
     def __init__(self, img_size=224, patch_size=16, output_class=3, dim=768, depth=12, heads=12, mlp_dim=3072, dropout=0.1):
         super(ViT, self).__init__()
         
