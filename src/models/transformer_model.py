@@ -51,12 +51,12 @@ class ViT(BaseModel):
         print(x.shape)
         
         # Classification head
-        cls_output = x[:, 0]  # Take CLS token output
+        cls_output = x.mean(dim=1) 
         print('cls_output', cls_output.shape)
         variance = self.variance(cls_output)
         variance = nn.functional.softplus(variance)
         print('variance', variance.shape)
         out = self.mlp_head(cls_output)
-        print('out', out.shape)
+        print('out', out.shape, out)
         
         return out, variance

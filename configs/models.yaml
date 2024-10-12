@@ -17,7 +17,7 @@ models:
     model_class: ViT
     params:
       num_classes: 3
-      learning_rate: 0.001
+      learning_rate: 0.01
       num_epochs: 100
 
   EUFairGAN:
