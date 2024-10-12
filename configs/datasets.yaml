@@ -5,7 +5,7 @@ datasets:
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
       batch_size: 32
-      img_dim: (128, 128)
+      img_dim: (224, 224)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
@@ -13,14 +13,14 @@ datasets:
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
       batch_size: 32
-      img_dim: (64, 64)
+      img_dim: (224, 224)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
       metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_test_images_location.csv"
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
-      img_dim: (64, 64)
+      img_dim: (224, 224)
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
