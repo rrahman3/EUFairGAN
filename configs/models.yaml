@@ -10,7 +10,14 @@ models:
     model_class: CNNModel
     params:
       num_classes: 3
-      learning_rate: 0.01
+      learning_rate: 0.001
+      num_epochs: 100
+
+  utkface_transformer:
+    model_class: ViT
+    params:
+      num_classes: 3
+      learning_rate: 0.001
       num_epochs: 100
 
   EUFairGAN:
