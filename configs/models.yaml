@@ -6,6 +6,14 @@ models:
       learning_rate: 0.001
       num_epochs: 100
 
+  celeba_med_transformer:
+    model_class: MedViT
+    params:
+      num_classes: 2
+      learning_rate: 0.001
+      num_epochs: 100
+
+
   utkface_cnn:
     model_class: CNNModel
     params:
@@ -14,10 +22,18 @@ models:
       num_epochs: 100
 
   utkface_transformer:
-    model_class: ViT2
+    model_class: ViT
     params:
       num_classes: 3
-      learning_rate: 0.01
+      learning_rate: 0.001
+      num_epochs: 100
+
+  
+  utkface_med_transformer:
+    model_class: MedViT
+    params:
+      num_classes: 3
+      learning_rate: 0.001
       num_epochs: 100
 
   EUFairGAN:

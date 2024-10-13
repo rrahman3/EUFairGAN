@@ -9,11 +9,19 @@ dataloader:
   shuffle: true
   num_workers: 4  # Number of subprocesses for data loading
 
+temp_training:
+  learning_rate: 0.001
+  num_epochs: 100
+  optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
+  loss_function: "nn.CrossEntropyLoss"  # Specify the loss function
+
 training:
   learning_rate: 0.001
   num_epochs: 100
   optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
   loss_function: "cross_entropy"  # Specify the loss function
+
+
 
 test_bnn:
   utkface_gender:

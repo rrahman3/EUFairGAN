@@ -48,7 +48,7 @@ class ViT2(BaseModel):
             nn.Linear(mlp_dim, num_classes)
         )
 
-    def forward(self, x):
+    def forward(self, x, y):
         batch_size = x.size(0)
         
         # Patch + Position Embedding
@@ -73,7 +73,7 @@ class ViT2(BaseModel):
     
 # Define Vision Transformer model
 class ViT(BaseModel):
-    def __init__(self, img_size=224, patch_size=16, output_class=3, dim=768, depth=12, heads=12, mlp_dim=3072, dropout=0.1):
+    def __init__(self, img_size=224, patch_size=16, num_classes=3, dim=768, depth=12, heads=12, mlp_dim=3072, dropout=0.1):
         super(ViT, self).__init__(model_name="ViT Model")
         
         # Patch embedding
@@ -98,7 +98,7 @@ class ViT(BaseModel):
         # MLP Head
         self.mlp_head = nn.Sequential(
             nn.LayerNorm(dim),
-            nn.Linear(dim, output_class)
+            nn.Linear(dim, num_classes)
         )
 
     def forward(self, x, y):

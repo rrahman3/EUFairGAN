@@ -67,8 +67,8 @@ class UTKFaceDataset(Dataset):
         
     def _process_raw_image(self, img, image_dim):
         img = img.resize(image_dim)
-        if image_dim != self.model_input_image_dim:
-            img = img.resize(self.model_input_image_dim)
+        # if image_dim != self.model_input_image_dim:
+        #     img = img.resize(self.model_input_image_dim)
         temp = np.array(img.copy())
         temp = temp/255.0
         temp = temp.transpose((2, 0, 1))
