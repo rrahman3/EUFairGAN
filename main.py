@@ -54,6 +54,7 @@ def main(args):
     model_class = globals()[model_info['model_class']]  # Dynamically load class
     model = model_class(num_classes=model_info['params']['num_classes'])
     model = model.to(device)
+    print(model)
     
     if task_name == 'train_bnn':
 
@@ -88,8 +89,8 @@ def main(args):
 if __name__ == "__main__":
     # Argument parsing
     parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
-    parser.add_argument('--model', default='utkface_med_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--dataset', default='UTKFace', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    parser.add_argument('--model', default='celeba_med_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--dataset', default='CelebA', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
     parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--task_config', default='utkface_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 

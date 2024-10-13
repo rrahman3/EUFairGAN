@@ -103,6 +103,7 @@ class MedViT(BaseModel):
         y = self.head(x)
         print('y', y.shape, '\n', y)
         variance = self.variance(x)
+        variance = nn.functional.softplus(variance)
         print('variance', variance.shape, '\n', variance)
         return y, variance
 
