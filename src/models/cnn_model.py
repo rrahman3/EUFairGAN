@@ -3,10 +3,10 @@ import torch.nn.functional as F
 from src.models.base_model import BaseModel
 
 class CNNModel(BaseModel): #input shape (None, 3, Px, Py)
-    def __init__(self, output_class=3, drop_rate=0.50, hidden_layer=128):
+    def __init__(self, num_classes=3, drop_rate=0.50, hidden_layer=128):
         super(CNNModel, self).__init__(model_name="CNN Model")
         self.hidden_layer = hidden_layer
-        self.output_class = output_class
+        self.num_classes = num_classes
         self.conv_1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
         self.relu_1 = nn.ReLU()
         self.max_pool_1 = nn.MaxPool2d(kernel_size=2)
@@ -29,7 +29,7 @@ class CNNModel(BaseModel): #input shape (None, 3, Px, Py)
         self.dense_1 = nn.LazyLinear(self.hidden_layer)
         self.variance = nn.Linear(self.hidden_layer, 1)
         # self.softplus = nn.Softplus()
-        self.dense_2 = nn.Linear(self.hidden_layer, self.output_class)
+        self.dense_2 = nn.Linear(self.hidden_layer, self.num_classes)
 
     def forward(self, images, genders):
         # images, genders = inputs

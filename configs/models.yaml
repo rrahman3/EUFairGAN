@@ -14,7 +14,7 @@ models:
       num_epochs: 100
 
   utkface_transformer:
-    model_class: ViT
+    model_class: ViT2
     params:
       num_classes: 3
       learning_rate: 0.01

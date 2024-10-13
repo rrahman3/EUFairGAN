@@ -2,7 +2,7 @@ import argparse
 import torch
 from src.dataloader.celeba_loader import CelebADataset
 from src.models.cnn_model import CNNModel
-from src.models.transformer_model import ViT
+from src.models.transformer_model import ViT, ViT2
 from src.training.trainer import Trainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
@@ -51,7 +51,7 @@ def main(args):
     # Initialize the corresponding model dynamically
     print(f"Initializing {model_name} model...")
     model_class = globals()[model_info['model_class']]  # Dynamically load class
-    model = model_class(output_class=model_info['params']['num_classes'])
+    model = model_class(num_classes=model_info['params']['num_classes'])
     model = model.to(device)
     
     if task_name == 'train_bnn':
