@@ -99,12 +99,12 @@ class MedViT(BaseModel):
 
         x = self.ln(x[:, 0])
 
-        print('x', x.shape, '\n', x)
+        # print('x', x.shape, '\n', x)
         y = self.head(x)
-        print('y', y.shape, '\n', y)
+        # print('y', y.shape, '\n', y)
         variance = self.variance(x)
         variance = nn.functional.softplus(variance)
-        print('variance', variance.shape, '\n', variance)
+        # print('variance', variance.shape, '\n', variance)
         return y, variance
 
 # # Example Usage
