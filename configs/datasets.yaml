@@ -3,8 +3,8 @@ datasets:
     train:
       metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_train_images_location.csv"
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
-      frac: .10
-      batch_size: 8
+      frac: 1
+      batch_size: 32
       img_dim: (224, 224)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
@@ -12,7 +12,7 @@ datasets:
       metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_validation_images_location.csv"
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
-      batch_size: 8
+      batch_size: 32
       img_dim: (224, 224)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
@@ -21,7 +21,7 @@ datasets:
       img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
       img_dim: (224, 224)
-      batch_size: 8
+      batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
       groups: ['male', 'female']
@@ -32,7 +32,7 @@ datasets:
       img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
       img_dim: (224, 224)
-      batch_size: 8
+      batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
@@ -40,14 +40,14 @@ datasets:
       img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
       img_dim: (224, 224)
-      batch_size: 8
+      batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
       metadata_file: "../AUFairGAN/data/celeba/celeba_test.csv"
       img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
-      img_dim: (64, 64)
+      img_dim: (224, 224)
       groups: ['male', 'female']
       batch_size: 32
       shuffle: True
