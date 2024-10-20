@@ -7,7 +7,7 @@ from torchvision import transforms
 from .custom_dataset import CustomDataset
 import numpy as np
     
-class CelebADataset(CustomDataset):
+class NIHChestXrayDataset(CustomDataset):
     def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None):
 
         self.image_dir = image_dir
@@ -76,7 +76,7 @@ class CelebADataset(CustomDataset):
             indices = self.metadata[self.metadata[column_name] == column_value].index.tolist()
             return torch.utils.data.Subset(self, indices)
 
-class CelebAESRGANDataset(CelebADataset):
+class NIHChestXrayESRGANDataset(NIHChestXrayDataset):
     def __init__(self, image_dir, metadata_file, lr_image_dim=(64, 64), hr_image_dim=(128, 128), frac=None):
         super().__init__(image_dir, metadata_file, lr_image_dim, frac)
         self.lr_image_dim = lr_image_dim
@@ -103,7 +103,7 @@ class CelebAESRGANDataset(CelebADataset):
         return sample['lr_image'], sample['hr_image'], sample['gender'], sample['y_label']
         
     
-class CelebAHRGeneratorDataset(CelebADataset):
+class NIHChestXrayHRGeneratorDataset(NIHChestXrayDataset):
     def __init__(self, image_dir, metadata_file, model, image_dim=(64, 64), input_dim=(128, 128), frac=None):
         super().__init__(image_dir, metadata_file, image_dim, frac)
         self.model = model

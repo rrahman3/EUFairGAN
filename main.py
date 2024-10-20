@@ -3,7 +3,8 @@ import torch
 from src.dataloader.celeba_loader import CelebADataset
 from src.models.cnn_model import CNNModel
 from src.models.transformer_model import ViT, ViT2
-from src.models.medical_transformer import MedViT
+from src.pretrained.MedViT import MedViT
+# from src.models.medical_transformer import MedViT
 from src.training.trainer import Trainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
@@ -89,13 +90,17 @@ def main(args):
 if __name__ == "__main__":
     # Argument parsing
     parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
-    parser.add_argument('--model', default='celeba_med_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--dataset', default='CelebA', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
-    parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--model', default='chestmnist_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--dataset', default='ChestMNIST', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    parser.add_argument('--task', default='quick_check',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--task_config', default='utkface_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
-    main(args)
+    if args.task == 'quick_check':
+        from src.pretrained.MedViT import check_medvit
+    else:
+        main(args)
+
 
 
 # Git Token

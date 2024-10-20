@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange, repeat
-from src.models.base_model import BaseModel
+from .base_model import BaseModel
 
 # Helper function: Patch Embedding
 class PatchEmbedding(nn.Module):

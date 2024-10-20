@@ -6,6 +6,13 @@ models:
       learning_rate: 0.001
       num_epochs: 100
 
+  chestmnist_transformer:
+    model_class: MedViT
+    params:
+      num_classes: 14
+      learning_rate: 0.001
+      num_epochs: 100
+
   celeba_med_transformer:
     model_class: MedViT
     params:
