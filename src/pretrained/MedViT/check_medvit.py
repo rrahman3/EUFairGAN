@@ -16,10 +16,12 @@ from torchsummary import summary
 
 
 from .MedViT import MedViT_small as tiny
+from .MedViT import MedViT_base as base
+from .MedViT import MedViT_large as large
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-model = tiny()
+model = base()
 
 model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
 
@@ -159,7 +161,7 @@ for epoch in range(NUM_EPOCHS):
         'loss': loss_log
     })
     df.to_csv('train_log_medvit.csv')
-    torch.save(model.state_dict(), f'medvit_mnist_wt{epoch}.pt')
+    torch.save(model.state_dict(), f'outputs/medvit_base/medvit_mnist__base_wt{epoch}.pt')
     print('model saved')
 
 
