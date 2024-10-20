@@ -43,8 +43,8 @@ data_flag = 'chestmnist'
 # pnemoniamnist, retinamnist, breastmnist, bloodmnist, tissuemnist, organamnist, organcmnist, organsmnist]
 download = True
 
-NUM_EPOCHS = 10
-BATCH_SIZE = 10
+NUM_EPOCHS = 100
+BATCH_SIZE = 32
 lr = 0.005
 
 info = INFO[data_flag]
@@ -90,34 +90,8 @@ else:
     
 optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
-# train
-
-for epoch in range(NUM_EPOCHS):
-    train_correct = 0
-    train_total = 0
-    test_correct = 0
-    test_total = 0
-    print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
-    model.train()
-    for inputs, targets in tqdm(train_loader):
-        inputs, targets = inputs.to(device), targets.to(device)
-        # forward + backward + optimize
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        
-        if task == 'multi-label, binary-class':
-            targets = targets.to(torch.float32)
-            loss = criterion(outputs, targets)
-        else:
-            targets = targets.squeeze().long()
-            loss = criterion(outputs, targets)
-        
-        loss.backward()
-        optimizer.step()
-
 
 # evaluation
-
 def test(split):
     model.eval()
     y_true = torch.tensor([]).to(device)
@@ -148,6 +122,47 @@ def test(split):
         metrics = evaluator.evaluate(y_score)
     
         print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
+
+# train
+loss_log = []
+epoch_log = []
+for epoch in range(NUM_EPOCHS):
+    train_correct = 0
+    train_total = 0
+    test_correct = 0
+    test_total = 0
+    print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
+    model.train()
+    for inputs, targets in tqdm(train_loader):
+        inputs, targets = inputs.to(device), targets.to(device)
+        # forward + backward + optimize
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        
+        if task == 'multi-label, binary-class':
+            targets = targets.to(torch.float32)
+            loss = criterion(outputs, targets)
+        else:
+            targets = targets.squeeze().long()
+            loss = criterion(outputs, targets)
+        
+        loss_log.append(loss.item())
+        epoch_log.append(epoch)
+        
+        loss.backward()
+        optimizer.step()
+    
+    test('test')
+    import pandas as pd
+    df = pd.DataFrame({
+        'epoch': epoch_log,
+        'loss': loss_log
+    })
+    df.to_csv('train_log_medvit.csv')
+
+
+
+
 
         
 print('==> Evaluating ...')
