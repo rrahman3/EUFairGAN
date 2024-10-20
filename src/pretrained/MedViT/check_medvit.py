@@ -159,6 +159,8 @@ for epoch in range(NUM_EPOCHS):
         'loss': loss_log
     })
     df.to_csv('train_log_medvit.csv')
+    torch.save(model.state_dict(), f'medvit_mnist_wt{epoch}.pt')
+    print('model saved')
 
 
 
