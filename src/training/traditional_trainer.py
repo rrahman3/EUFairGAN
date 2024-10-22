@@ -7,6 +7,7 @@ from src.evaluations.traditional_evaluator import TraditionalEvaluator
 from src.utils.losses import crossentropy_loss
 from src.utils.filename_manager import FilenameManager
 from src.utils.results_writer import MetricsTracker
+from tqdm import tqdm
 
 class TraditionalTrainer:
     def __init__(self, model, dataloader, config):
@@ -66,8 +67,8 @@ class TraditionalTrainer:
         self.model.train()
 
         running_loss = 0.0
-
-        for batch, (images, genders, y)  in enumerate(self.dataloader):
+        batch = 0
+        for images, genders, y  in tqdm(self.dataloader):
             images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
             if epoch == 1 and batch == 0:
                 print(f'{images.shape}, {genders.shape}, {y.shape}')
@@ -84,6 +85,8 @@ class TraditionalTrainer:
             loss.backward()
             self.optimizer.step()
             self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
+
+            batch += 1
         
         epoch_loss = running_loss / self.num_samples
         print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
@@ -106,11 +109,11 @@ class TraditionalTrainer:
                     print(f'{images.shape}, {genders.shape}, {y.shape}')
 
                 # Compute prediction and loss
-                pred, var = self.model(images)
-                loss = self.loss_function(y, pred, var)
+                pred = self.model(images)
+                loss = self.loss_function(y, pred)
                 running_loss += loss.item() * images.shape[0]
 
-                self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred, y_variance=var)
+                self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
 
             
         epoch_loss = running_loss / len(val_loader)
