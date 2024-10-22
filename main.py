@@ -105,3 +105,5 @@ if __name__ == "__main__":
 
 # Git Token
 # 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
+
+# git clone https://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@github.com/rrahman3/EUFairGAN.git
