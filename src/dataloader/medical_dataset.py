@@ -15,6 +15,7 @@ class NIHChestXrayDataset(CustomDataset):
         self.metadata = self._process_csv()
         if frac is not None:
             self.metadata = self.metadata.sample(frac=frac, random_state=42).reset_index(drop=True)
+        
         self.image_dim = image_dim
         print(len(self.metadata))
         self.model_input_image_dim = (128, 128)
@@ -27,16 +28,30 @@ class NIHChestXrayDataset(CustomDataset):
         image = Image.open(img_name).convert('RGB')
         lr_image = self._process_raw_image(image, self.image_dim)
 
-        gender = np.array([self.metadata.Male[idx]]).astype(np.float32)
-        y_label = np.eye(2)[self.metadata.Smiling[idx]].reshape(-1).astype(np.float32)
+        # gender = np.array([self.metadata.Male[idx]]).astype(np.float32)
+        y_label = self.get_labels(idx)
+        # print(y_label)
         
         sample = {
                     'lr_image': lr_image,
-                    'gender': gender, 
+                    # 'gender': gender, 
                     'y_label': y_label, 
                 }
         
-        return sample['lr_image'], sample['gender'], sample['y_label']
+        return sample['lr_image'], sample['y_label'], sample['y_label']
+    
+    def get_labels(self, idx):
+        labels_column = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
+                            'Effusion', 'Emphysema', 'Fibrosis', 'Hernia', 'Infiltration', 'Mass',
+                            'Nodule', 'Pleural Thickening', 'Pneumonia', 'Pneumothorax',
+                            'Pneumoperitoneum', 'Pneumomediastinum', 'Subcutaneous Emphysema',
+                            'Tortuous Aorta', 'Calcification of the Aorta', 'No Finding'
+                        ]
+        labels = self.metadata[labels_column].loc[idx]
+        labels_numpy = np.array(labels).astype(np.float32)
+        # print(labels_numpy)
+        return labels_numpy
+
     
     def _process_raw_image(self, img, image_dim):
         img = img.resize(image_dim)
@@ -50,19 +65,20 @@ class NIHChestXrayDataset(CustomDataset):
 
     def _process_csv(self):
         metadata = pd.read_csv(self.metadata_file)
-        metadata = metadata.replace(-1, 0)
-        metadata['FullPath'] = os.path.join(self.image_dir) + metadata.image_file
+        print(metadata.columns)        
+        # metadata = metadata.replace(-1, 0)
+        metadata['FullPath'] = metadata['id'].apply(lambda x: os.path.join(self.image_dir, str(x)))
         return metadata
     
     def filter_by_gender(self, gender_type):        
         if gender_type == 'male':
-            gender_value = 1
+            gender_value = 'M'
         elif gender_type == 'female':
-            gender_value = 0
+            gender_value = 'F'
         else:
             raise Exception(f"Invalid gender type: {gender_type}") 
                
-        gender_indices = self.metadata[self.metadata.Male == gender_value].index.tolist()
+        gender_indices = self.metadata[self.metadata['Patient Gender'] == gender_value].index.tolist()
         return torch.utils.data.Subset(self, gender_indices)
     
     def filter_dataset(self, column_name, column_value): #column_name == Male, column value 0 for female, 1, for male       
@@ -142,14 +158,3 @@ class NIHChestXrayHRGeneratorDataset(NIHChestXrayDataset):
         img = Image.fromarray(image)
         return self._process_raw_image(img, self.input_dim)
 
-
-
-if __name__=="__main__":
-    print("Hello Nuha & Ruhani")
-
-    NIHChestXrayDataset(
-        image_dir="data/nihcc_chest_xray/images/"
-              metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv"
-      img_dir: "data/nihcc_chest_xray/images/"
-
-    )

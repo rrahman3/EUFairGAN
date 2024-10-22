@@ -6,12 +6,13 @@ from src.models.transformer_model import ViT, ViT2
 from src.pretrained.MedViT import MedViT
 # from src.models.medical_transformer import MedViT
 from src.training.trainer import Trainer
+from src.training.traditional_trainer import TraditionalTrainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory
 from src.utils.filename_manager import FilenameManager
 from src.evaluations.monte_carlo import MonteCarloPrediction
-
+from src.models.model_factory import model_factory
 
 def main(args):
     dataset_name = args.dataset
@@ -45,23 +46,15 @@ def main(args):
     male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
 
-    # Get model info
-    model_info = models_config['models'].get(model_name)
-    if model_info is None:
-        raise ValueError(f"Model '{model_name}' not found in configuration.")
-
-    # Initialize the corresponding model dynamically
-    print(f"Initializing {model_name} model...")
-    model_class = globals()[model_info['model_class']]  # Dynamically load class
-    model = model_class(num_classes=model_info['params']['num_classes'])
-    model = model.to(device)
+    model = model_factory(model_name=model_name, models_config=models_config)
     print(model)
-    
+
+     
     if task_name == 'train_bnn':
 
         # Initialize Trainer
         print(f"Training {model_name} on {dataset_name}...")
-        trainer = Trainer(
+        trainer = TraditionalTrainer(
             model=model,
             dataloader=train_loader,
             config=config
@@ -90,14 +83,33 @@ def main(args):
 if __name__ == "__main__":
     # Argument parsing
     parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
-    parser.add_argument('--model', default='chestmnist_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--dataset', default='ChestMNIST', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
-    parser.add_argument('--task', default='quick_check',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--model', default='nihccchest_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--dataset', default='NIHChestXray', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--task_config', default='utkface_gender',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
     if args.task == 'quick_check':
-        from src.pretrained.MedViT import check_medvit
+        # from src.pretrained.MedViT import check_medvit
+        from src.dataloader.medical_dataset import NIHChestXrayDataset
+        from torch.utils.data import DataLoader
+        dataset = NIHChestXrayDataset(
+            image_dir="data/nihcc_chest_xray/xray_images/",
+            metadata_file="data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv",
+            image_dim=(224, 224),
+        )
+        print(len(dataset))
+        dataloader = DataLoader(
+            dataset,
+            batch_size=32,
+            shuffle=True,
+            num_workers=4
+        )
+        for (x, y) in dataloader:
+            print(y)
+            print(x.shape)
+            print(y.shape)
+
     else:
         main(args)
 

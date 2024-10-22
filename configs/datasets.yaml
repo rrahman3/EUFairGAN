@@ -1,7 +1,7 @@
 datasets:
   ChestMNIST:
     train:
-      metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv"
+      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv"
       img_dir: "data/nihcc_chest_xray/images/"
       frac: 1
       batch_size: 32
@@ -9,7 +9,7 @@ datasets:
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
-      metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv"
+      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv"
       img_dir: "data/nihcc_chest_xray/images/"
       frac: 1
       batch_size: 32
@@ -17,7 +17,7 @@ datasets:
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
-      metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv"
+      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv"
       img_dir: "data/nihcc_chest_xray/images/"
       frac: 1
       batch_size: 32
@@ -27,24 +27,24 @@ datasets:
       
   NIHChestXray:
     train:
-      metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv"
-      img_dir: "data/nihcc_chest_xray/images/"
+      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv"
+      img_dir: "data/nihcc_chest_xray/xray_images/"
       frac: 1
       batch_size: 32
       img_dim: (224, 224)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
-      metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_val.csv"
-      img_dir: "data/nihcc_chest_xray/images/"
+      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv"
+      img_dir: "data/nihcc_chest_xray/xray_images/"
       frac: 1.00
       batch_size: 32
       img_dim: (224, 224)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
-      metadata_file: "data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_test.csv"
-      img_dir: "data/nihcc_chest_xray/images/"
+      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv"
+      img_dir: "data/nihcc_chest_xray/xray_images/"
       frac: 1.00
       img_dim: (224, 224)
       batch_size: 32

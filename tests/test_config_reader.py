@@ -28,5 +28,16 @@ class TestConfigReader(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             self.config_reader.load_config('invalid_config.yaml')
 
+
+from src.dataloader.medical_dataset import NIHChestXrayDataset
+class TestDataset(unittest.TestCase):
+    def test_nihcc_chest_xray():
+        dataset = NIHChestXrayDataset(
+            image_dir="data/nihcc_chest_xray/images/",
+            metadata_file="data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv",
+            image_dim=(224, 224),
+        )
+        print(len(dataset))
+
 if __name__ == '__main__':
     unittest.main()
