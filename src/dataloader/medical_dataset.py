@@ -19,6 +19,13 @@ class NIHChestXrayDataset(CustomDataset):
         self.image_dim = image_dim
         print(len(self.metadata))
         self.model_input_image_dim = (128, 128)
+        self.transform = transforms.Compose([
+            transforms.Resize((224, 224)),         # Resize the images to 128x128
+            transforms.RandomHorizontalFlip(),     # Apply random horizontal flip
+            transforms.ToTensor(),                 # Convert image to PyTorch tensor
+            transforms.Normalize((0.5, 0.5, 0.5), # Normalize the images with mean and std
+                                (0.5, 0.5, 0.5)) 
+        ])
 
     def __len__(self):
         return len(self.metadata)
@@ -26,7 +33,8 @@ class NIHChestXrayDataset(CustomDataset):
     def __getitem__(self, idx):
         img_name = self.metadata.FullPath[idx]
         image = Image.open(img_name).convert('RGB')
-        lr_image = self._process_raw_image(image, self.image_dim)
+        # lr_image = self._process_raw_image(image, self.image_dim)
+        lr_image = self.transform(image)
 
         # gender = np.array([self.metadata.Male[idx]]).astype(np.float32)
         y_label = self.get_labels(idx)

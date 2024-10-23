@@ -42,7 +42,7 @@ class TraditionalTrainer:
         if self.loss_function_config == "cross_entropy":
             return crossentropy_loss
         elif self.loss_function_config == "nn.CrossEntropyLoss":
-            return nn.CrossEntropyLoss()
+            return nn.BCEWithLogitsLoss()
         else:
             raise ValueError(f"Unsupported loss function: {self.loss_function_config}")
 
