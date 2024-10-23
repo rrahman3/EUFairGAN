@@ -46,7 +46,7 @@ class CopyImages:
             if os.path.exists(source_img_path):
                 for class_name in class_lables:
                     target_img_path = os.path.join(self.dst_dir, class_name, img_file)
-                    if os.path.exists(source_img_path):
+                    if os.path.exists(target_img_path):
                         print("Already destination file exists.")
                         continue
                     shutil.copy(source_img_path, target_img_path)
