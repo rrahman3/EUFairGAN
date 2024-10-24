@@ -14,7 +14,7 @@ datasets:
       frac: 1
       batch_size: 32
       img_dim: (224, 224)
-      shuffle: True
+      shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
     val:
       metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv"
@@ -22,7 +22,7 @@ datasets:
       frac: 1
       batch_size: 32
       img_dim: (224, 224)
-      shuffle: True
+      shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
       
   NIHChestXray:
@@ -40,7 +40,7 @@ datasets:
       frac: 1.00
       batch_size: 32
       img_dim: (224, 224)
-      shuffle: True
+      shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
     test:
       metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv"
@@ -48,7 +48,7 @@ datasets:
       frac: 1.00
       img_dim: (224, 224)
       batch_size: 32
-      shuffle: True
+      shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
       groups: ['male', 'female']
 

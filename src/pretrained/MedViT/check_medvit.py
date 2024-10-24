@@ -126,49 +126,50 @@ def test(split):
         print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
 
 # train
-loss_log = []
-epoch_log = []
-for epoch in range(NUM_EPOCHS):
-    train_correct = 0
-    train_total = 0
-    test_correct = 0
-    test_total = 0
-    print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
-    model.train()
-    num_batch = 0
-    for inputs, targets in tqdm(train_loader):
-        inputs, targets = inputs.to(device), targets.to(device)
-        # forward + backward + optimize
-        optimizer.zero_grad()
-        outputs = model(inputs)
+def train():
+    loss_log = []
+    epoch_log = []
+    for epoch in range(NUM_EPOCHS):
+        train_correct = 0
+        train_total = 0
+        test_correct = 0
+        test_total = 0
+        print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
+        model.train()
+        num_batch = 0
+        for inputs, targets in tqdm(train_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            # forward + backward + optimize
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            
+            if task == 'multi-label, binary-class':
+                targets = targets.to(torch.float32)
+                loss = criterion(outputs, targets)
+            else:
+                targets = targets.squeeze().long()
+                loss = criterion(outputs, targets)
+            
+            loss_log.append(loss.item())
+            epoch_log.append(epoch)
+            print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
+            loss.backward()
+            optimizer.step()
+            num_batch += 1
         
-        if task == 'multi-label, binary-class':
-            targets = targets.to(torch.float32)
-            loss = criterion(outputs, targets)
-        else:
-            targets = targets.squeeze().long()
-            loss = criterion(outputs, targets)
-        
-        loss_log.append(loss.item())
-        epoch_log.append(epoch)
-        print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
-        loss.backward()
-        optimizer.step()
-        num_batch += 1
-    
-    test('test')
-    import pandas as pd
-    df = pd.DataFrame({
-        'epoch': epoch_log,
-        'loss': loss_log
-    })
-    df.to_csv('outputs/medvit_base/train_log_medvit_base.csv')
-    torch.save(model.state_dict(), f'outputs/medvit_base/medvit_mnist__base_wt{epoch}.pt')
-    print('model saved')
+        test('test')
+        import pandas as pd
+        df = pd.DataFrame({
+            'epoch': epoch_log,
+            'loss': loss_log
+        })
+        df.to_csv('outputs/medvit_base/train_log_medvit_base.csv')
+        torch.save(model.state_dict(), f'outputs/medvit_base/medvit_mnist__base_wt{epoch}.pt')
+        print('model saved')
 
 
 
-
+train()
 
         
 print('==> Evaluating ...')

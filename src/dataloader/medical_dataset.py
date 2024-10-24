@@ -62,7 +62,7 @@ class NIHChestXrayDataset(CustomDataset):
                     'y_label': y_label, 
                 }
         
-        return sample['lr_image'], sample['y_label'], sample['y_label']
+        return sample['lr_image'], sample['y_label']
     
     def get_labels(self, idx):
         labels_column = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',

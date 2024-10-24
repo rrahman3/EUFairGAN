@@ -70,6 +70,7 @@ class TraditionalTrainer:
 
         running_loss = 0.0
         num_batch = 0
+        self.model.train()
         for batch_data  in tqdm(self.dataloader):
 
             if len(batch_data) == 2:
@@ -87,11 +88,11 @@ class TraditionalTrainer:
                 raise ValueError(f"Unexpected batch size: {len(batch_data)}")
             
 
-            self.model.train()
             self.optimizer.zero_grad()
 
             # Compute prediction and loss
             pred = self.model(images)
+            
             loss = self.loss_function(y, pred)
             running_loss += loss.item()
             print(pred[0])

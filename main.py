@@ -90,9 +90,11 @@ if __name__ == "__main__":
     parser.add_argument('--task_config', default='medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
-    if args.task == 'mnist_medvit':
-        print()
+    print(args)
+    if args.task == 'check_medvit':
+        print(f'task: {args.task}')
         from src.pretrained.MedViT import check_medvit
+        check_medvit.train()
     else:
         main(args)
 
