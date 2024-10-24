@@ -42,8 +42,8 @@ class TraditionalEvaluator:
         self.all_labels_binary.extend(y_true.detach().cpu().numpy())
         self.all_predictions_probabilities.extend(pred_sigmoid.detach().cpu().numpy())
 
-        self.compute_epoch_metrics()
-        self.print_metrics()
+        # self.compute_epoch_metrics()
+        # self.print_metrics()
         
 
     def compute_epoch_metrics(self):
