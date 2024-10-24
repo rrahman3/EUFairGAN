@@ -97,7 +97,7 @@ from src.dataloader.medical_dataset import NIHChestXrayDataset
 dataset = NIHChestXrayDataset(
         metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/",
-        frac=0.01,
+        frac=1.00,
         isTest=False,
     )
 
