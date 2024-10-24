@@ -23,7 +23,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = base()
 
-model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=20, bias=True)
+model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
 
 model = model.to(device)
 
