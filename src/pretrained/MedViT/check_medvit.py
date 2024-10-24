@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+from sklearn.metrics import f1_score, roc_auc_score, accuracy_score, confusion_matrix
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -97,15 +97,15 @@ from src.dataloader.medical_dataset import NIHChestXrayDataset
 train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
         frac=1.00, isTest=False)
-train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
         frac=1.00, isTest=False)
 
-test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False)
-male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False)
-female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False)
+test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
+male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
+female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False, num_workers=4)
 
 
 # evaluation
@@ -146,7 +146,27 @@ def test(model_pth=None, sensitive_group=None):
 
         y_true = y_true.cpu().numpy()
         y_score = y_score.detach().cpu().numpy()
+        print(f'y_true.shape = {y_true.shape}')
+        print(f'y_score.shape = {y_score.shape}')
+        print(f"--------------------------Confusion matrix------------------------------:")
+        for i in range(y_true.shape[1]):
+            y_true_label = y_true[:, i]
+            y_pred_label = y_score[:, i]
+            
+            cm = confusion_matrix(y_true_label, y_pred_label)
+            print(f"Confusion matrix for label {i}:")
+            print(cm)
+        print(f"--------------------------F1 Score------------------------------:")
+        f1 = f1_score(y_true, y_score, average='micro')
+        print(f"F1 Score: {f1}")
         
+        print(f"--------------------------AUC Score------------------------------:")
+        if len(np.unique(y_true)) == 2:
+            auc = roc_auc_score(labels_binary, pred_sigmoid.detach().cpu().numpy(), multi_class='ovo')
+            print(f"ROC AUC: {auc}")
+        else:
+            print("Only one class present in y_true. Skipping AUC calculation.")
+
         # evaluator = Evaluator(data_flag, split)
         # metrics = evaluator.evaluate(y_score)
     
