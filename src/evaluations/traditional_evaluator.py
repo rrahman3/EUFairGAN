@@ -26,16 +26,24 @@ class TraditionalEvaluator:
     def update_metrics(self, y_true, y_pred): # y_ture is the binary form of the y_true (None, 1, num_classes) # [[0, 0, 1, 0]] (1, 1, 4)
 
         # Get predictions
-        pred_softmax = F.softmax(y_pred, dim=1)
+        # pred_softmax = F.softmax(y_pred, dim=1)
+        pred_sigmoid = torch.sigmoid(y_pred)
+        y_pred_binary = (pred_sigmoid > 0.5).float()
+        print('y_pred_binary: ', y_pred_binary)
 
-        _, y_pred_argmax = torch.max(pred_softmax, 1)
-        _, y_true_argmax = torch.max(y_true, 1)
+        # _, y_pred_argmax = torch.max(pred_sigmoid, 1)
+        # _, y_true_argmax = torch.max(y_true, 1)
 
-        self.all_labels_direct.extend(y_true_argmax.cpu().numpy())
-        self.all_predictions_driect.extend(y_pred_argmax.cpu().numpy())
+        self.all_labels_direct.extend(y_true.cpu().numpy())
+        self.all_predictions_driect.extend(y_pred_binary.cpu().numpy())
+
+        print('Direct Labels')
 
         self.all_labels_binary.extend(y_true.detach().cpu().numpy())
-        self.all_predictions_probabilities.extend(pred_softmax.detach().cpu().numpy())
+        self.all_predictions_probabilities.extend(pred_sigmoid.detach().cpu().numpy())
+
+        self.compute_epoch_metrics()
+        self.print_metrics()
         
 
     def compute_epoch_metrics(self):

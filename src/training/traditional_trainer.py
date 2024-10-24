@@ -80,6 +80,7 @@ class TraditionalTrainer:
             pred = self.model(images)
             loss = self.loss_function(y, pred)
             running_loss += loss.item() * images.shape[0]
+            print(pred)
 
             # Backpropagation
             loss.backward()
@@ -102,11 +103,13 @@ class TraditionalTrainer:
         self.evaluation_metrics.reset_metrics()
 
         running_loss = 0.0
+        batch = 0
         with torch.no_grad():
-            for batch, (images, genders, y)  in enumerate(val_loader):
+            for images, genders, y  in tqdm(val_loader):
                 images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
                 if batch == 0:
                     print(f'{images.shape}, {genders.shape}, {y.shape}')
+                batch += 1
 
                 # Compute prediction and loss
                 pred = self.model(images)

@@ -24,6 +24,17 @@ training:
 
 
 test_bnn:
+  medvit_test:
+    desc: 'Dataset: NIHCC Chest Xray, Model: MedViT, Task: Age Prediction, Outclass: 3, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 14K'
+    bnn_model_location: 'medvit_mnist__base_wt75.pt'
+    dataset: 'UTKFace'
+    model_class: 'MedViT'
+    hyperparameters:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      optimizer: 'adam'
+
   utkface_gender:
     desc: 'Dataset: UTKFace, Model: CNNModel, Task: Age Prediction, Outclass: 3, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 14K'
     bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20241010_200858/models/model_weights__epoch50_lr0.001_20241010_200858..pth'

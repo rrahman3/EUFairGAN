@@ -55,6 +55,23 @@ class NIHChestXrayDataset(CustomDataset):
                             'Pneumoperitoneum', 'Pneumomediastinum', 'Subcutaneous Emphysema',
                             'Tortuous Aorta', 'Calcification of the Aorta', 'No Finding'
                         ]
+        
+        labels_column = ['Atelectasis', 
+                         'Cardiomegaly',
+                         'Effusion', 
+                         'Infiltration', 
+                         'Mass',
+                         'Nodule', 
+                         'Pneumonia', 
+                         'Pneumothorax',
+                         'Consolidation',
+                         'Edema',
+                         'Emphysema', 
+                         'Fibrosis', 
+                         'Pleural Thickening', 
+                         'Hernia', 
+                    ]
+
         labels = self.metadata[labels_column].loc[idx]
         labels_numpy = np.array(labels).astype(np.float32)
         # print(labels_numpy)
