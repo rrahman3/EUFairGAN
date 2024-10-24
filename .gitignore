@@ -3,10 +3,10 @@ data/
 logs/
 .vscode/
 outputs/
-
+saved_models/
 # Ignore operating system files
 EUFairGAN.code-workspace
 
 # Ignore Python cache and virtual environments
 **/__pycache__/
-saved_models/
+
