@@ -91,6 +91,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     if args.task == 'mnist_medvit':
+        print()
         from src.pretrained.MedViT import check_medvit
     else:
         main(args)

@@ -1,6 +1,7 @@
-# Machine Learning Project
+# Uncertainty Fairness Research Project
 
-This repository contains a modular machine learning project designed to facilitate the training and evaluation of multiple models on different datasets using object-oriented programming (OOP) principles.
+This repository contains the all the coding of the uncertainty fairness project. I tried to apply the opject-oriented programming (OOP) when coding. In a normal ml project, we just normally use the jupyter notebook, but for a big project like this, where we need to desgin multiple models and dataset and do different types of experiemtn and same code can be resued, a notebook is tough to scale. That's why I choose OOP principles.
+
 
 ## Project Structure
 /ml_project 

@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from .celeba_loader import CelebADataset
 from .utkface_loader import UTKFaceDataset
-from .chestmnist_dataset import *
+from .chestmnist_dataset import train_loader, train_loader_at_eval, test_loader
 from .medical_dataset import NIHChestXrayDataset
 
 def dataloader_factory(dataset_name, split, config, group=None): #group nust be 'male/female, black/white
@@ -44,6 +44,18 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
             groups = config[split]['groups']
             if groups[0] == "male" or groups[0] =="female":
                 dataset = dataset.filter_by_gender(groups[group])
+
+    elif dataset_name == "ChestMNIST":
+        if split == 'train':
+            return train_loader
+
+        elif split == 'val':
+            return train_loader_at_eval
+
+        elif split == 'test':
+            return test_loader
+
+
     
     
     else:

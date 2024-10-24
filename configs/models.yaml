@@ -10,14 +10,14 @@ models:
     model_class: MedViT
     params:
       num_classes: 14
-      learning_rate: 0.001
+      learning_rate: 0.005
       num_epochs: 100
       
   nihccchest_transformer:
     model_class: MedViT
     params:
-      num_classes: 20
-      learning_rate: 0.001
+      num_classes: 14
+      learning_rate: 0.005
       num_epochs: 100
 
 

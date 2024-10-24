@@ -70,10 +70,22 @@ class TraditionalTrainer:
 
         running_loss = 0.0
         num_batch = 0
-        for images, genders, y  in tqdm(self.dataloader):
-            images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
-            if epoch == 1 and num_batch == 0:
-                print(f'{images.shape}, {genders.shape}, {y.shape}')
+        for batch_data  in tqdm(self.dataloader):
+
+            if len(batch_data) == 2:
+                images, y = batch_data
+                images, y = images.to(self.device), y.to(self.device)
+                y = y.float()
+                if epoch == 1 and num_batch == 0:
+                    print(f'{images.shape}, {y.shape}')
+            elif len(batch_data) == 3:
+                images, genders, y = batch_data
+                images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
+                if epoch == 1 and num_batch == 0:
+                    print(f'{images.shape}, {y.shape}')
+            else:
+                raise ValueError(f"Unexpected batch size: {len(batch_data)}")
+            
 
             self.model.train()
             self.optimizer.zero_grad()
@@ -109,10 +121,22 @@ class TraditionalTrainer:
         running_loss = 0.0
         num_batch = 0
         with torch.no_grad():
-            for images, genders, y  in tqdm(val_loader):
-                images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
-                if num_batch == 0:
-                    print(f'{images.shape}, {genders.shape}, {y.shape}')
+            for batch_data  in tqdm(val_loader):
+
+                if len(batch_data) == 2:
+                    images, y = batch_data
+                    images, y = images.to(self.device), y.to(self.device)
+                    y = y.float()
+                    if num_batch == 0:
+                        print(f'{images.shape}, {y.shape}')
+                elif len(batch_data) == 3:
+                    images, genders, y = batch_data
+                    images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
+                    if num_batch == 0:
+                        print(f'{images.shape}, {y.shape}')
+                else:
+                    raise ValueError(f"Unexpected batch size: {len(batch_data)}")
+            
 
                 # Compute prediction and loss
                 pred = self.model(images)
