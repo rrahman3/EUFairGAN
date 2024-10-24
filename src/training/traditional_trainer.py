@@ -110,14 +110,15 @@ class TraditionalTrainer:
                 images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
                 if num_batch == 0:
                     print(f'{images.shape}, {genders.shape}, {y.shape}')
-                num_batch += 1
 
                 # Compute prediction and loss
                 pred = self.model(images)
                 loss = self.loss_function(y, pred)
                 running_loss += loss.item()
+                print(f'validation batch {num_batch}: loss {loss.item()}')
 
                 self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
+                num_batch += 1
 
             
         epoch_loss = running_loss / num_batch
