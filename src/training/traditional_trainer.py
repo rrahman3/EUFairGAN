@@ -34,7 +34,9 @@ class TraditionalTrainer:
 
     def _initialize_optimizer(self):
         if self.optimizer_config == "adam":
-            return optim.Adam(self.model.parameters(), lr=self.learning_rate)
+            return optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9)
+
+            # return optim.Adam(self.model.parameters(), lr=self.learning_rate)
         else:
             raise ValueError(f"Unsupported optimizer: {self.optimizer_config}")
 

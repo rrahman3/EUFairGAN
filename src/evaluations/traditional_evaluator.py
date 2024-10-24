@@ -29,7 +29,7 @@ class TraditionalEvaluator:
         # pred_softmax = F.softmax(y_pred, dim=1)
         pred_sigmoid = torch.sigmoid(y_pred)
         y_pred_binary = (pred_sigmoid > 0.5).float()
-        print('y_pred_binary: ', y_pred_binary)
+        # print('y_pred_binary: ', y_pred_binary)
 
         # _, y_pred_argmax = torch.max(pred_sigmoid, 1)
         # _, y_true_argmax = torch.max(y_true, 1)
@@ -37,7 +37,7 @@ class TraditionalEvaluator:
         self.all_labels_direct.extend(y_true.cpu().numpy())
         self.all_predictions_driect.extend(y_pred_binary.cpu().numpy())
 
-        print('Direct Labels')
+        # print('Direct Labels')
 
         self.all_labels_binary.extend(y_true.detach().cpu().numpy())
         self.all_predictions_probabilities.extend(pred_sigmoid.detach().cpu().numpy())

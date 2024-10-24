@@ -90,27 +90,8 @@ if __name__ == "__main__":
     parser.add_argument('--task_config', default='medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
-    if args.task == 'quick_check':
-        # from src.pretrained.MedViT import check_medvit
-        from src.dataloader.medical_dataset import NIHChestXrayDataset
-        from torch.utils.data import DataLoader
-        dataset = NIHChestXrayDataset(
-            image_dir="data/nihcc_chest_xray/xray_images/",
-            metadata_file="data/nihcc_chest_xray/miccai2023_nih-cxr-lt_labels_train.csv",
-            image_dim=(224, 224),
-        )
-        print(len(dataset))
-        dataloader = DataLoader(
-            dataset,
-            batch_size=32,
-            shuffle=True,
-            num_workers=4
-        )
-        for (x, y) in dataloader:
-            print(y)
-            print(x.shape)
-            print(y.shape)
-
+    if args.task == 'mnist_medvit':
+        from src.pretrained.MedViT import check_medvit
     else:
         main(args)
 
