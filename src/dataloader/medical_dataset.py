@@ -6,9 +6,10 @@ import pandas as pd
 from torchvision import transforms
 from .custom_dataset import CustomDataset
 import numpy as np
+import torchvision
     
 class NIHChestXrayDataset(CustomDataset):
-    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None):
+    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None, isTest=False):
 
         self.image_dir = image_dir
         self.metadata_file = metadata_file
@@ -19,6 +20,19 @@ class NIHChestXrayDataset(CustomDataset):
         self.image_dim = image_dim
         print(len(self.metadata))
         self.model_input_image_dim = (128, 128)
+        self.train_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            # transforms.Lambda(lambda image: image.convert('RGB')),
+            torchvision.transforms.AugMix(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[.5], std=[.5])
+        ])
+        self.test_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            # transforms.Lambda(lambda image: image.convert('RGB')),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[.5], std=[.5])
+        ])
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),         # Resize the images to 128x128
             transforms.RandomHorizontalFlip(),     # Apply random horizontal flip
@@ -26,15 +40,17 @@ class NIHChestXrayDataset(CustomDataset):
             transforms.Normalize((0.5, 0.5, 0.5), # Normalize the images with mean and std
                                 (0.5, 0.5, 0.5)) 
         ])
+        self.isTest = isTest
 
     def __len__(self):
         return len(self.metadata)
 
     def __getitem__(self, idx):
         img_name = self.metadata.FullPath[idx]
+        # image = Image.open(img_name)
         image = Image.open(img_name).convert('RGB')
         # lr_image = self._process_raw_image(image, self.image_dim)
-        lr_image = self.transform(image)
+        lr_image = self.test_transform(image) if self.isTest else self.train_transform(image)
 
         # gender = np.array([self.metadata.Male[idx]]).astype(np.float32)
         y_label = self.get_labels(idx)
