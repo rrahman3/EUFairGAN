@@ -16,7 +16,7 @@ temp_training:
   loss_function: "cross_entropy"  # Specify the loss function
 
 training:
-  learning_rate: 0.001
+  learning_rate: 0.005
   num_epochs: 100
   optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
   loss_function: "nn.CrossEntropyLoss"  # Specify the loss function
@@ -30,7 +30,7 @@ test_bnn:
     dataset: 'UTKFace'
     model_class: 'MedViT'
     hyperparameters:
-      learning_rate: 0.001
+      learning_rate: 0.005
       epochs: 100
       batch_size: 32
       optimizer: 'adam'
