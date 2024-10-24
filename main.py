@@ -19,6 +19,9 @@ def main(args):
     model_name = args.model
     task_name = args.task
     task_config_name = args.task_config
+
+
+    
     file_manger = FilenameManager(model_name=model_name, dataset_name=dataset_name, task_name=task_name)
 
 
@@ -27,6 +30,20 @@ def main(args):
     datasets_config = configs['datasets']
     models_config = configs['models']
     config = configs['project']
+
+    if args.task == 'check_medvit_train':
+        print(f'task: {args.task}')
+        from src.pretrained.MedViT import check_medvit
+        check_medvit.train()
+
+    elif args.task == 'check_medvit_test':
+        model_pth = config[task_name]['model_pth']
+        print(f'task: {args.task}')
+        from src.pretrained.MedViT import check_medvit
+        print('Male Testing')
+        check_medvit.test(model_pth, 'male')
+        print('Female Testing')
+        check_medvit.test(model_pth, 'female')
 
     # Device configuration (GPU or CPU)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -49,7 +66,8 @@ def main(args):
     model = model_factory(model_name=model_name, models_config=models_config)
     print(model)
 
-     
+
+    
     if task_name == 'train_bnn':
 
         # Initialize Trainer
@@ -86,17 +104,13 @@ if __name__ == "__main__":
     parser.add_argument('--model', default='nihccchest_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--dataset', default='NIHChestXray', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
     # parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--task', default='test_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--task', default='check_medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--task_config', default='medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
     print(args)
-    if args.task == 'check_medvit':
-        print(f'task: {args.task}')
-        from src.pretrained.MedViT import check_medvit
-        check_medvit.train()
-    else:
-        main(args)
+
+    main(args)
 
 
 

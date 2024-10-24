@@ -34,12 +34,15 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
                 dataset = dataset.filter_by_gender(groups[group])
     
     elif dataset_name == "NIHChestXray":
+        isTest = True if split == 'test' else False
         dataset = NIHChestXrayDataset(
             metadata_file=config[split]['metadata_file'],
             image_dir=config[split]['img_dir'],
-            image_dim=eval(config[split]['img_dim']),
-            frac=config[split]['frac']
+            # image_dim=eval(config[split]['img_dim']),
+            frac=config[split]['frac'],
+            isTest=isTest,
         )
+
         if split == 'test':
             groups = config[split]['groups']
             if groups[0] == "male" or groups[0] =="female":

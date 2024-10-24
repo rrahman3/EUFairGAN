@@ -94,46 +94,63 @@ optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
 from src.dataloader.medical_dataset import NIHChestXrayDataset
 
-dataset = NIHChestXrayDataset(
-        metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
-        image_dir="data/nihcc_chest_xray/xray_images/",
-        frac=1.00,
-        isTest=False,
-    )
+train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
+        image_dir="data/nihcc_chest_xray/xray_images/", 
+        frac=1.00, isTest=False)
+train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-train_loader = data.DataLoader(
-        dataset,
-        batch_size=32,
-        shuffle=True,
-    )
+test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
+        image_dir="data/nihcc_chest_xray/xray_images/", 
+        frac=1.00, isTest=False)
+
+test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False)
+male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False)
+female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False)
 
 
 # evaluation
-# def test(split):
-#     model.eval()
-#     y_true = torch.tensor([]).to(device)
-#     y_score = torch.tensor([]).to(device)
+def test(model_pth=None, sensitive_group=None):
+    if model_pth is not None:
+        test_model = base()
+        test_model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
+        test_model.load_model(model_pth)
+        test_model = test_model.to(device)
+
+    test_model.eval()
+    y_true = torch.tensor([]).to(device)
+    y_score = torch.tensor([]).to(device)
     
-#     data_loader = train_loader_at_eval if split == 'train' else test_loader
+    # data_loader = train_loader_at_eval if split == 'train' else test_loader
+    if sensitive_group == 'male':
+        data_loader = male_test_loader
+    elif sensitive_group == 'female':
+        data_loader = male_test_loader
+    else:
+        data_loader = test_loader
+    num_batch = 0
+    with torch.no_grad():
+        for inputs, targets in tqdm(data_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = test_model(inputs)
+            loss = criterion(outputs, targets)
 
-#     with torch.no_grad():
-#         for inputs, targets in data_loader:
-#             inputs, targets = inputs.to(device), targets.to(device)
-#             outputs = model(inputs)
+            targets = targets.to(torch.float32)
+            outputs = outputs.softmax(dim=-1)
 
-#             targets = targets.to(torch.float32)
-#             outputs = outputs.softmax(dim=-1)
+            print(f'batch: {num_batch}, loss: {loss}\n {targets[0]}, \n, {outputs[0]}')
 
-#             y_true = torch.cat((y_true, targets), 0)
-#             y_score = torch.cat((y_score, outputs), 0)
 
-#         y_true = y_true.cpu().numpy()
-#         y_score = y_score.detach().cpu().numpy()
+            y_true = torch.cat((y_true, targets), 0)
+            y_score = torch.cat((y_score, outputs), 0)
+
+
+        y_true = y_true.cpu().numpy()
+        y_score = y_score.detach().cpu().numpy()
         
-#         # evaluator = Evaluator(data_flag, split)
-#         # metrics = evaluator.evaluate(y_score)
+        # evaluator = Evaluator(data_flag, split)
+        # metrics = evaluator.evaluate(y_score)
     
-#         # print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
+        # print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
 
 # train
 def train():
@@ -175,7 +192,7 @@ def train():
 
 
 
-train()
+# train()
 
         
 # print('==> Evaluating ...')

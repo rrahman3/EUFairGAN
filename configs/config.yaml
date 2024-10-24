@@ -22,8 +22,11 @@ training:
   loss_function: "nn.CrossEntropyLoss"  # Specify the loss function
 
 
+check_medvit_test:
+  model_pth: 'outputs/medvit_base/medvit_mnist__base_wt10.pt'
 
 test_bnn:
+
   medvit_test:
     desc: 'Dataset: NIHCC Chest Xray, Model: MedViT, Task: Age Prediction, Outclass: 3, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 14K'
     bnn_model_location: 'medvit_mnist__base_wt75.pt'
