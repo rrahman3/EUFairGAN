@@ -67,10 +67,10 @@ class TraditionalTrainer:
         self.model.train()
 
         running_loss = 0.0
-        batch = 0
+        num_batch = 0
         for images, genders, y  in tqdm(self.dataloader):
             images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
-            if epoch == 1 and batch == 0:
+            if epoch == 1 and num_batch == 0:
                 print(f'{images.shape}, {genders.shape}, {y.shape}')
 
             self.model.train()
@@ -79,17 +79,18 @@ class TraditionalTrainer:
             # Compute prediction and loss
             pred = self.model(images)
             loss = self.loss_function(y, pred)
-            running_loss += loss.item() * images.shape[0]
-            print(pred)
+            running_loss += loss.item()
+            print(pred[0])
+            print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
 
             # Backpropagation
             loss.backward()
             self.optimizer.step()
             self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
 
-            batch += 1
+            num_batch += 1
         
-        epoch_loss = running_loss / self.num_samples
+        epoch_loss = running_loss / num_batch
         print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
         epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
         self.evaluation_metrics.print_metrics()
@@ -103,23 +104,23 @@ class TraditionalTrainer:
         self.evaluation_metrics.reset_metrics()
 
         running_loss = 0.0
-        batch = 0
+        num_batch = 0
         with torch.no_grad():
             for images, genders, y  in tqdm(val_loader):
                 images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
-                if batch == 0:
+                if num_batch == 0:
                     print(f'{images.shape}, {genders.shape}, {y.shape}')
-                batch += 1
+                num_batch += 1
 
                 # Compute prediction and loss
                 pred = self.model(images)
                 loss = self.loss_function(y, pred)
-                running_loss += loss.item() * images.shape[0]
+                running_loss += loss.item()
 
                 self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
 
             
-        epoch_loss = running_loss / len(val_loader)
+        epoch_loss = running_loss / num_batch
         print(f"Validation Loss: {epoch_loss:.4f}")
         epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
         print(f"Validation:\n")
