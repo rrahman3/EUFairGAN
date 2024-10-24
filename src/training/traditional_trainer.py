@@ -57,8 +57,8 @@ class TraditionalTrainer:
             model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
             self.model.save_model(model_saved_path)
 
-            self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
-            self.results_writer.save()
+            # self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
+            # self.results_writer.save()
 
 
 
@@ -86,15 +86,16 @@ class TraditionalTrainer:
             # Backpropagation
             loss.backward()
             self.optimizer.step()
-            self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
+            # self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
 
             num_batch += 1
         
         epoch_loss = running_loss / num_batch
         print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
-        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
-        self.evaluation_metrics.print_metrics()
-        self.evaluation_metrics.reset_metrics()
+        epoch_metrics = ''        
+        # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        # self.evaluation_metrics.print_metrics()
+        # self.evaluation_metrics.reset_metrics()
 
         return epoch_loss, epoch_metrics
         
@@ -123,10 +124,11 @@ class TraditionalTrainer:
             
         epoch_loss = running_loss / num_batch
         print(f"Validation Loss: {epoch_loss:.4f}")
-        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
-        print(f"Validation:\n")
-        self.evaluation_metrics.print_metrics()
-        self.evaluation_metrics.reset_metrics()
+        epoch_metrics = ''
+        # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        # print(f"Validation:\n")
+        # self.evaluation_metrics.print_metrics()
+        # self.evaluation_metrics.reset_metrics()
 
         return epoch_loss, epoch_metrics
 

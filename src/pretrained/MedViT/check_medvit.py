@@ -135,6 +135,7 @@ for epoch in range(NUM_EPOCHS):
     test_total = 0
     print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
     model.train()
+    num_batch = 0
     for inputs, targets in tqdm(train_loader):
         inputs, targets = inputs.to(device), targets.to(device)
         # forward + backward + optimize
@@ -150,9 +151,10 @@ for epoch in range(NUM_EPOCHS):
         
         loss_log.append(loss.item())
         epoch_log.append(epoch)
-        
+        print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
         loss.backward()
         optimizer.step()
+        num_batch += 1
     
     test('test')
     import pandas as pd
