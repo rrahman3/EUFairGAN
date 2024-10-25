@@ -263,11 +263,9 @@ def train():
     loss_log = []
     epoch_log = []
     variance_log = torch.tensor([]).to(device)
+    epoch_loss = 0
     for epoch in range(NUM_EPOCHS):
-        train_correct = 0
-        train_total = 0
-        test_correct = 0
-        test_total = 0
+        epoch_loss = 0
         print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
         model.train()
         num_batch = 0
@@ -279,21 +277,24 @@ def train():
             
             targets = targets.to(torch.float32)
             loss = criterion(outputs, targets, variance)
+            epoch_loss += loss.item()
             
             loss_log.append(loss.item())
             epoch_log.append(epoch)
-            variance_log = torch.cat((variance_log, torch.mean(variance).unsqueeze(0)), 0)
-            print(f'epoch {epoch}, batch {num_batch}: loss: {loss.item()}, variance: {torch.mean(variance)}')
+            # variance_log = torch.cat((variance_log, torch.mean(variance).unsqueeze(0)), 0)
+            # print(f'epoch {epoch}, batch {num_batch}: loss: {loss.item()}, variance: {torch.mean(variance)}')
             loss.backward()
             optimizer.step()
             num_batch += 1
         variance_log = variance_log.detach().cpu().numpy()
-        print(f'Aleatoric Uncertainty: {np.mean(variance_log)}')
+        print(f'Epoch {epoch}, loss: {epoch_loss/num_batch}')
+        print(f'Epoch {epoch}, Aleatoric Uncertainty: {np.mean(variance_log)}')
+
         import pandas as pd
         df = pd.DataFrame({
             'epoch': epoch_log,
             'loss': loss_log,
-            'variance': variance_log.flatten()
+            # 'variance': variance_log.flatten()
         })
         df.to_csv('outputs/bnn_medvit_base/train_log_medvit_base.csv')
         torch.save(model.state_dict(), f'outputs/bnn_medvit_base/medvit_mnist__base_wt{epoch}.pt')
