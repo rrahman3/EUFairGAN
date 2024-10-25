@@ -47,17 +47,17 @@ def main(args):
     
     elif args.task == 'check_bnn_medvit_train':
         print(f'task: {args.task}')
-        from src.pretrained.MedViT import check_medvit
-        check_medvit.train()
+        from src.pretrained.MedViT import BNN_MedViT_Training
+        BNN_MedViT_Training.train()
 
     elif args.task == 'check_bnn_medvit_test':
         model_pth = config[task_name]['model_pth']
         print(f'task: {args.task}')
-        from src.pretrained.MedViT import check_medvit
+        from src.pretrained.MedViT import BNN_MedViT_Training
         print('Male Testing')
-        check_medvit.test(model_pth=model_pth, sensitive_group='male')
+        BNN_MedViT_Training.test(model_pth=model_pth, sensitive_group='male')
         print('Female Testing')
-        check_medvit.test(model_pth=model_pth, sensitive_group='female')
+        BNN_MedViT_Training.test(model_pth=model_pth, sensitive_group='female')
 
     else:
 
