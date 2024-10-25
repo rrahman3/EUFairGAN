@@ -262,9 +262,9 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
 def train():
     loss_log = []
     epoch_log = []
-    variance_log = torch.tensor([]).to(device)
     epoch_loss = 0
     for epoch in range(NUM_EPOCHS):
+        variance_log = torch.tensor([]).to(device)
         epoch_loss = 0
         print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
         model.train()
@@ -281,7 +281,7 @@ def train():
             
             loss_log.append(loss.item())
             epoch_log.append(epoch)
-            # variance_log = torch.cat((variance_log, torch.mean(variance).unsqueeze(0)), 0)
+            variance_log = torch.cat((variance_log, torch.mean(variance).unsqueeze(0)), 0)
             # print(f'epoch {epoch}, batch {num_batch}: loss: {loss.item()}, variance: {torch.mean(variance)}')
             loss.backward()
             optimizer.step()
