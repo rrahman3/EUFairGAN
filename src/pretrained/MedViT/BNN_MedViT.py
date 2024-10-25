@@ -508,17 +508,17 @@ class BNN_MedViT(BaseModel):
 
 @register_model
 def BNN_MedViT_small(pretrained=False, pretrained_cfg=None, **kwargs):
-    model = BNN_MedViT_small(stem_chs=[64, 32, 64], depths=[3, 4, 10, 3], path_dropout=0.1, **kwargs)
+    model = BNN_MedViT(stem_chs=[64, 32, 64], depths=[3, 4, 10, 3], path_dropout=0.1, **kwargs)
     return model
 
 
 @register_model
 def BNN_MedViT_base(pretrained=False, pretrained_cfg=None, **kwargs):
-    model = BNN_MedViT_small(stem_chs=[64, 32, 64], depths=[3, 4, 20, 3], path_dropout=0.2, **kwargs)
+    model = BNN_MedViT(stem_chs=[64, 32, 64], depths=[3, 4, 20, 3], path_dropout=0.2, **kwargs)
     return model
 
 
 @register_model
 def BNN_MedViT_large(pretrained=False, pretrained_cfg=None, **kwargs):
-    model = BNN_MedViT_small(stem_chs=[64, 32, 64], depths=[3, 4, 30, 3], path_dropout=0.2, **kwargs)
+    model = BNN_MedViT(stem_chs=[64, 32, 64], depths=[3, 4, 30, 3], path_dropout=0.2, **kwargs)
     return model
