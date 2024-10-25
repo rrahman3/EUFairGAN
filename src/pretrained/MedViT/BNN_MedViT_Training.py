@@ -176,6 +176,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
     test_model.eval()
     y_true = torch.tensor([]).to(device)
     y_score = torch.tensor([]).to(device)
+    variance_log = torch.tensor([]).to(device)
     
     # data_loader = train_loader_at_eval if split == 'train' else test_loader
     if sensitive_group == 'male':
@@ -189,14 +190,14 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
     
     num_batch = 0
     loss_log = []
-    variance_log = []
+    # variance_log = []
     with torch.no_grad():
         for inputs, targets in tqdm(data_loader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs, variance = test_model(inputs)
             loss = criterion(outputs, targets, variance)
             loss_log.append(loss.item())
-            variance_log.append(variance)
+            variance_log = torch.cat((variance_log, variance), 0)
 
             targets = targets.to(torch.float32)
             # outputs = outputs.softmax(dim=-1)
@@ -213,13 +214,14 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
 
         y_true = y_true.cpu().numpy()
         y_score = y_score.detach().cpu().numpy()
+        variance_log = variance_log.detach().cpu().numpy()
         # print(f'y_true.shape = {y_true.shape}')
         # print(y_true[15])
         # print(f'y_score.shape = {y_score.shape}')
         # print(y_score[15])
         metrics = evaluator.evaluate(y_score, y_true)
         print(metrics)
-        print(f'Aleatoric Uncertainty: {np.mean(np.array(variance_log))}')
+        print(f'Aleatoric Uncertainty: {np.mean(variance_log)}')
         print(f"--------------------------Confusion matrix------------------------------:")
         for i in range(y_true.shape[1]):
             y_true_label = y_true[:, i]
@@ -260,8 +262,8 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
 def train():
     loss_log = []
     epoch_log = []
-    variance_log = []
     for epoch in range(NUM_EPOCHS):
+        variance_log = torch.tensor([]).to(device)
         train_correct = 0
         train_total = 0
         test_correct = 0
@@ -280,11 +282,14 @@ def train():
             
             loss_log.append(loss.item())
             epoch_log.append(epoch)
-            variance_log.append(variance)
-            print(f'epoch {epoch}, batch {num_batch}: loss: {loss.item()}, variance: {variance}')
+            variance_log = torch.cat((variance_log, variance), 0)
+            print(f'epoch {epoch}, batch {num_batch}: loss: {loss.item()}, variance: {torch.mean(variance)}')
             loss.backward()
             optimizer.step()
             num_batch += 1
+        variance_log = variance_log.detach().cpu().numpy()
+        print(f'Aleatoric Uncertainty: {np.mean(variance_log)}')
+
         print("-----------------------------------------Validation-----------------------------------------")
         test(test_model=model, sensitive_group='val')
         print("-----------------------------------------Validation-----------------------------------------")
