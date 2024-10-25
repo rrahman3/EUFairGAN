@@ -107,7 +107,53 @@ test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_wo
 male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
 female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False, num_workers=4)
 
+import numpy as np
+from sklearn.metrics import accuracy_score, f1_score, hamming_loss, roc_auc_score, precision_score, recall_score
 
+class MultiLabelEvaluator:
+    def __init__(self, n_labels=14, threshold=0.5):
+        self.n_labels = n_labels  # Number of labels per sample
+        self.threshold = threshold  # Threshold for binary classification
+
+    def apply_threshold(self, y_pred):
+        """
+        Apply threshold to the predicted probabilities to convert to binary labels.
+        """
+        return (y_pred >= self.threshold).astype(int)
+
+    def evaluate(self, y_pred, y_true):
+        """
+        Evaluate model performance using various multi-label classification metrics.
+        """
+        # Apply threshold to convert probabilities to binary labels
+        y_pred_bin = self.apply_threshold(y_pred)
+        
+        # Accuracy (Subset accuracy): exact match of all labels
+        accuracy = accuracy_score(y_true, y_pred_bin)
+        
+        # Hamming loss: fraction of labels that are incorrectly predicted
+        h_loss = hamming_loss(y_true, y_pred_bin)
+        
+        # Precision, Recall, F1 Score (Macro average across labels)
+        precision = precision_score(y_true, y_pred_bin, average='macro')
+        recall = recall_score(y_true, y_pred_bin, average='macro')
+        f1 = f1_score(y_true, y_pred_bin, average='macro')
+        
+        # AUC-ROC (per label, then averaged)
+        auc_roc = roc_auc_score(y_true, y_pred, average='macro')
+        
+        # Return all metrics as a dictionary
+        return {
+            "accuracy": accuracy,
+            "hamming_loss": h_loss,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1,
+            "auc_roc": auc_roc
+        }
+
+
+evaluator = MultiLabelEvaluator()
 # evaluation
 def test(model_pth=None, sensitive_group=None):
     if model_pth is not None:
@@ -137,7 +183,7 @@ def test(model_pth=None, sensitive_group=None):
             targets = targets.to(torch.float32)
             # outputs = outputs.softmax(dim=-1)
             outputs = torch.sigmoid(outputs)
-            outputs = (outputs > 0.5).float()
+            # outputs = (outputs > 0.5).float()
 
             print(f'batch: {num_batch}, loss: {loss}\n {targets[0]}, \n, {outputs[0]}')
 
@@ -152,6 +198,8 @@ def test(model_pth=None, sensitive_group=None):
         print(y_true[15])
         print(f'y_score.shape = {y_score.shape}')
         print(y_score[15])
+        metrics = evaluator.evaluate(y_score, y_true)
+        print(metrics)
         print(f"--------------------------Confusion matrix------------------------------:")
         for i in range(y_true.shape[1]):
             y_true_label = y_true[:, i]

@@ -44,57 +44,59 @@ def main(args):
         check_medvit.test(model_pth, 'male')
         print('Female Testing')
         check_medvit.test(model_pth, 'female')
-
-    # Device configuration (GPU or CPU)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    print(f"Initializing DataLoader for {dataset_name}...")
-    # Initialize DataLoader for the specified dataset
-    dataset_info = datasets_config['datasets'].get(dataset_name)
-    print(dataset_info)
-    print(dataset_info['train']['img_dim'])
-    if dataset_info is None:
-        raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
-    
-    # Create the DataLoaders for train, validation, and test splits
-    train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
-    val_loader = dataloader_factory(dataset_name, 'val', dataset_info)
-
-    male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
-    female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
-
-    model = model_factory(model_name=model_name, models_config=models_config)
-    print(model)
+    else:
 
 
-    
-    if task_name == 'train_bnn':
+        # Device configuration (GPU or CPU)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        # Initialize Trainer
-        print(f"Training {model_name} on {dataset_name}...")
-        trainer = TraditionalTrainer(
-            model=model,
-            dataloader=train_loader,
-            config=config
-        )
+        print(f"Initializing DataLoader for {dataset_name}...")
+        # Initialize DataLoader for the specified dataset
+        dataset_info = datasets_config['datasets'].get(dataset_name)
+        print(dataset_info)
+        print(dataset_info['train']['img_dim'])
+        if dataset_info is None:
+            raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
+        
+        # Create the DataLoaders for train, validation, and test splits
+        train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
+        val_loader = dataloader_factory(dataset_name, 'val', dataset_info)
 
-        # Train the model
-        trainer.train(val_loader)
+        male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
+        female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
 
-    elif task_name == 'test_bnn':
-        task_config = config[task_name][task_config_name]
-        print(task_config)
+        model = model_factory(model_name=model_name, models_config=models_config)
+        print(model)
 
-        model_saved_location = task_config['bnn_model_location']
-        model.load_model(model_saved_location)        
 
-        print('Male test')
-        male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader)
-        male_monte_carlo.asfsdgd()
+        
+        if task_name == 'train_bnn':
 
-        print('Female test')
-        female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader)
-        female_monte_carlo.asfsdgd()
+            # Initialize Trainer
+            print(f"Training {model_name} on {dataset_name}...")
+            trainer = TraditionalTrainer(
+                model=model,
+                dataloader=train_loader,
+                config=config
+            )
+
+            # Train the model
+            trainer.train(val_loader)
+
+        elif task_name == 'test_bnn':
+            task_config = config[task_name][task_config_name]
+            print(task_config)
+
+            model_saved_location = task_config['bnn_model_location']
+            model.load_model(model_saved_location)        
+
+            print('Male test')
+            male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader)
+            male_monte_carlo.asfsdgd()
+
+            print('Female test')
+            female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader)
+            female_monte_carlo.asfsdgd()
 
     
 
