@@ -244,7 +244,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
             val_log_file = 'outputs/medvit_base/validation_log_medvit_base.csv'
             df = pd.DataFrame({
                 'loss': np.mean(np.array(loss_log))
-            })
+            }, index=[0])
             if os.path.exists(val_log_file):
                 df_prev = pd.read_csv(val_log_file)
                 df = pd.concat([df_prev, df], axis=0, ignore_index=True)
