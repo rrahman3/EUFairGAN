@@ -41,9 +41,9 @@ def main(args):
         print(f'task: {args.task}')
         from src.pretrained.MedViT import check_medvit
         print('Male Testing')
-        check_medvit.test(model_pth, 'male')
+        check_medvit.test(model_pth=model_pth, sensitive_group='male')
         print('Female Testing')
-        check_medvit.test(model_pth, 'female')
+        check_medvit.test(model_pth=model_pth, sensitive_group='female')
     else:
 
 

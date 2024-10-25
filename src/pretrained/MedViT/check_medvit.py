@@ -278,13 +278,13 @@ def train():
             optimizer.step()
             num_batch += 1
         print("-----------------------------------------Validation-----------------------------------------")
-        test(model, 'val')
+        test(test_model=model, sensitive_group='val')
         print("-----------------------------------------Validation-----------------------------------------")
         print("-----------------------------------------Male Samples-----------------------------------------")
-        test(model, 'male')
+        test(test_model=model, sensitive_group='male')
         print("-----------------------------------------Male Samples-----------------------------------------")
         print("-----------------------------------------Female Samples-----------------------------------------")
-        test(model, 'female')
+        test(test_model=model, sensitive_group='female')
         print("-----------------------------------------Female Samples-----------------------------------------")
         import pandas as pd
         df = pd.DataFrame({
