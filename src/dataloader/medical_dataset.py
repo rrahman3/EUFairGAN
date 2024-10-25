@@ -29,6 +29,7 @@ class NIHChestXrayDataset(CustomDataset):
             transforms.Normalize(mean=[.5], std=[.5])
         ])
         self.test_transform = transforms.Compose([
+            transforms.Resize((112, 112)),
             transforms.Resize((224, 224)),
             # transforms.Lambda(lambda image: image.convert('RGB')),
             transforms.ToTensor(),
