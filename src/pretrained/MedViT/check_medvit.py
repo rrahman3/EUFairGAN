@@ -300,7 +300,7 @@ def train():
             'epoch': epoch_log,
             'loss': loss_log
         })
-        df.to_csv('outputs/medvit_base_{out_features}/train_log_medvit_base.csv')
+        df.to_csv(f'outputs/medvit_base_{out_features}/train_log_medvit_base.csv')
         torch.save(model.state_dict(), f'outputs/medvit_base_{out_features}/medvit_mnist__base_wt{epoch}.pt')
         print('model saved')
 
