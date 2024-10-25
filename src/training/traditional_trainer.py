@@ -93,7 +93,7 @@ class TraditionalTrainer:
             # Compute prediction and loss
             pred = self.model(images)
             
-            loss = self.loss_function(y, pred)
+            loss = self.loss_function(pred, y)
             running_loss += loss.item()
             print(pred[0])
             print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
