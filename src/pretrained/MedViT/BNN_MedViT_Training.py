@@ -103,12 +103,12 @@ train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_w
 
 validation_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
-        frac=0.01, isTest=False)
+        frac=1.0, isTest=False)
 validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
-        frac=0.01, isTest=False)
+        frac=1.0, isTest=False)
 
 test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
