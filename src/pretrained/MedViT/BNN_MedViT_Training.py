@@ -262,8 +262,8 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
 def train():
     loss_log = []
     epoch_log = []
+    variance_log = torch.tensor([]).to(device)
     for epoch in range(NUM_EPOCHS):
-        variance_log = torch.tensor([]).to(device)
         train_correct = 0
         train_total = 0
         test_correct = 0
