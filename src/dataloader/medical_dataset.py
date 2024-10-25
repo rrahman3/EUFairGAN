@@ -10,6 +10,7 @@ import torchvision
     
 class NIHChestXrayDataset(CustomDataset):
     def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None, isTest=False):
+        print("-------------------------------------------Loading NIHCC Chest Xray dataset------------------------------------------")
 
         self.image_dir = image_dir
         self.metadata_file = metadata_file

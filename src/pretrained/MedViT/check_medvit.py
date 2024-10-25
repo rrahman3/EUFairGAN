@@ -99,6 +99,11 @@ train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_c
         frac=1.00, isTest=False)
 train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
+validation_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv",
+        image_dir="data/nihcc_chest_xray/xray_images/", 
+        frac=1.00, isTest=False)
+validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4)
+
 test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
         frac=1.00, isTest=False)
@@ -155,7 +160,11 @@ class MultiLabelEvaluator:
 
 evaluator = MultiLabelEvaluator()
 # evaluation
-def test(model_pth=None, sensitive_group=None):
+def test(test_model=None, model_pth=None, sensitive_group=None):
+    if test_model == None and model_pth == None:
+        print("---------------------------------------------------Fuck You------------------------------------------------")
+        exit(1)
+
     if model_pth is not None:
         test_model = base()
         test_model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
@@ -171,21 +180,27 @@ def test(model_pth=None, sensitive_group=None):
         data_loader = male_test_loader
     elif sensitive_group == 'female':
         data_loader = male_test_loader
-    else:
+    elif sensitive_group == 'val':
         data_loader = test_loader
+    else:
+        data_loader = validation_loader
+    
     num_batch = 0
+    loss_log = []
     with torch.no_grad():
         for inputs, targets in tqdm(data_loader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = test_model(inputs)
             loss = criterion(outputs, targets)
+            loss_log.append(loss.item())
 
             targets = targets.to(torch.float32)
             # outputs = outputs.softmax(dim=-1)
             outputs = torch.sigmoid(outputs)
             # outputs = (outputs > 0.5).float()
 
-            print(f'batch: {num_batch}, loss: {loss}\n {targets[0]}, \n, {outputs[0]}')
+            # print(f'batch: {num_batch}, loss: {loss}\n {targets[0]}, \n, {outputs[0]}')
+            num_batch += 1
 
 
             y_true = torch.cat((y_true, targets), 0)
@@ -194,25 +209,26 @@ def test(model_pth=None, sensitive_group=None):
 
         y_true = y_true.cpu().numpy()
         y_score = y_score.detach().cpu().numpy()
-        print(f'y_true.shape = {y_true.shape}')
-        print(y_true[15])
-        print(f'y_score.shape = {y_score.shape}')
-        print(y_score[15])
+        # print(f'y_true.shape = {y_true.shape}')
+        # print(y_true[15])
+        # print(f'y_score.shape = {y_score.shape}')
+        # print(y_score[15])
         metrics = evaluator.evaluate(y_score, y_true)
         print(metrics)
         print(f"--------------------------Confusion matrix------------------------------:")
         for i in range(y_true.shape[1]):
             y_true_label = y_true[:, i]
             y_pred_label = y_score[:, i]
+            y_pred_label = (y_pred_label >= 0.5).float()
             
             cm = confusion_matrix(y_true_label, y_pred_label)
             print(f"Confusion matrix for label {i}:")
             print(cm)
-        print(f"--------------------------F1 Score------------------------------:")
-        f1 = f1_score(y_true, y_score, average='micro')
-        print(f"F1 Score: {f1}")
+        # print(f"--------------------------F1 Score------------------------------:")
+        # f1 = f1_score(y_true, y_score, average='micro')
+        # print(f"F1 Score: {f1}")
         
-        print(f"--------------------------AUC Score------------------------------:")
+        # print(f"--------------------------AUC Score------------------------------:")
         # if len(np.unique(y_true)) == 2:
         #     auc = roc_auc_score(labels_binary, pred_sigmoid.detach().cpu().numpy(), multi_class='ovo')
         #     print(f"ROC AUC: {auc}")
@@ -223,6 +239,16 @@ def test(model_pth=None, sensitive_group=None):
         # metrics = evaluator.evaluate(y_score)
     
         # print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
+        if sensitive_group == 'val':
+            import pandas as pd
+            val_log_file = 'outputs/medvit_base/validation_log_medvit_base.csv'
+            df = pd.DataFrame({
+                'loss': np.mean(np.array(loss_log))
+            })
+            if os.path.exists(val_log_file):
+                df_prev = pd.read_csv(val_log_file)
+                df = pd.concat([df_prev, df], axis=0, ignore_index=True)
+            df.to_csv(val_log_file)
 
 # train
 def train():
@@ -251,8 +277,15 @@ def train():
             loss.backward()
             optimizer.step()
             num_batch += 1
-        
-        # test('test')
+        print("-----------------------------------------Validation-----------------------------------------")
+        test(model, 'val')
+        print("-----------------------------------------Validation-----------------------------------------")
+        print("-----------------------------------------Male Samples-----------------------------------------")
+        test(model, 'male')
+        print("-----------------------------------------Male Samples-----------------------------------------")
+        print("-----------------------------------------Female Samples-----------------------------------------")
+        test(model, 'female')
+        print("-----------------------------------------Female Samples-----------------------------------------")
         import pandas as pd
         df = pd.DataFrame({
             'epoch': epoch_log,
