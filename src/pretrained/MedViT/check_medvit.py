@@ -284,15 +284,17 @@ def train():
             loss.backward()
             optimizer.step()
             num_batch += 1
-        print("-----------------------------------------Validation-----------------------------------------")
-        test(test_model=model, sensitive_group='val')
-        print("-----------------------------------------Validation-----------------------------------------")
-        print("-----------------------------------------Male Samples-----------------------------------------")
-        test(test_model=model, sensitive_group='male')
-        print("-----------------------------------------Male Samples-----------------------------------------")
-        print("-----------------------------------------Female Samples-----------------------------------------")
-        test(test_model=model, sensitive_group='female')
-        print("-----------------------------------------Female Samples-----------------------------------------")
+        if (epoch+1) % 5 == 0:
+            print("-----------------------------------------Validation-----------------------------------------")
+            test(test_model=model, sensitive_group='val')
+            print("-----------------------------------------Validation-----------------------------------------")
+            print("-----------------------------------------Male Samples-----------------------------------------")
+            test(test_model=model, sensitive_group='male')
+            print("-----------------------------------------Male Samples-----------------------------------------")
+            print("-----------------------------------------Female Samples-----------------------------------------")
+            test(test_model=model, sensitive_group='female')
+            print("-----------------------------------------Female Samples-----------------------------------------")
+
         import pandas as pd
         df = pd.DataFrame({
             'epoch': epoch_log,

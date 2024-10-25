@@ -299,16 +299,16 @@ def train():
         torch.save(model.state_dict(), f'outputs/bnn_medvit_base/medvit_mnist__base_wt{epoch}.pt')
         print('model saved')
 
-
-        print("-----------------------------------------Validation-----------------------------------------")
-        test(test_model=model, sensitive_group='val')
-        print("-----------------------------------------Validation-----------------------------------------")
-        print("-----------------------------------------Male Samples-----------------------------------------")
-        test(test_model=model, sensitive_group='male')
-        print("-----------------------------------------Male Samples-----------------------------------------")
-        print("-----------------------------------------Female Samples-----------------------------------------")
-        test(test_model=model, sensitive_group='female')
-        print("-----------------------------------------Female Samples-----------------------------------------")
+        if (epoch+1) % 5 == 0:
+            print("-----------------------------------------Validation-----------------------------------------")
+            test(test_model=model, sensitive_group='val')
+            print("-----------------------------------------Validation-----------------------------------------")
+            print("-----------------------------------------Male Samples-----------------------------------------")
+            test(test_model=model, sensitive_group='male')
+            print("-----------------------------------------Male Samples-----------------------------------------")
+            print("-----------------------------------------Female Samples-----------------------------------------")
+            test(test_model=model, sensitive_group='female')
+            print("-----------------------------------------Female Samples-----------------------------------------")
 
 
 
