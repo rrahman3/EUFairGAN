@@ -219,7 +219,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
         for i in range(y_true.shape[1]):
             y_true_label = y_true[:, i]
             y_pred_label = y_score[:, i]
-            y_pred_label = (y_pred_label >= 0.5).float()
+            y_pred_label = (y_pred_label >= 0.5).astype('float')
             
             cm = confusion_matrix(y_true_label, y_pred_label)
             print(f"Confusion matrix for label {i}:")
