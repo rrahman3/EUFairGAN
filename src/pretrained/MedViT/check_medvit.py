@@ -135,7 +135,9 @@ def test(model_pth=None, sensitive_group=None):
             loss = criterion(outputs, targets)
 
             targets = targets.to(torch.float32)
-            outputs = outputs.softmax(dim=-1)
+            # outputs = outputs.softmax(dim=-1)
+            outputs = torch.sigmoid(outputs)
+            outputs = (outputs > 0.5).float()
 
             print(f'batch: {num_batch}, loss: {loss}\n {targets[0]}, \n, {outputs[0]}')
 
@@ -147,7 +149,9 @@ def test(model_pth=None, sensitive_group=None):
         y_true = y_true.cpu().numpy()
         y_score = y_score.detach().cpu().numpy()
         print(f'y_true.shape = {y_true.shape}')
+        print(y_true[15])
         print(f'y_score.shape = {y_score.shape}')
+        print(y_score[15])
         print(f"--------------------------Confusion matrix------------------------------:")
         for i in range(y_true.shape[1]):
             y_true_label = y_true[:, i]
@@ -161,11 +165,11 @@ def test(model_pth=None, sensitive_group=None):
         print(f"F1 Score: {f1}")
         
         print(f"--------------------------AUC Score------------------------------:")
-        if len(np.unique(y_true)) == 2:
-            auc = roc_auc_score(labels_binary, pred_sigmoid.detach().cpu().numpy(), multi_class='ovo')
-            print(f"ROC AUC: {auc}")
-        else:
-            print("Only one class present in y_true. Skipping AUC calculation.")
+        # if len(np.unique(y_true)) == 2:
+        #     auc = roc_auc_score(labels_binary, pred_sigmoid.detach().cpu().numpy(), multi_class='ovo')
+        #     print(f"ROC AUC: {auc}")
+        # else:
+        #     print("Only one class present in y_true. Skipping AUC calculation.")
 
         # evaluator = Evaluator(data_flag, split)
         # metrics = evaluator.evaluate(y_score)
