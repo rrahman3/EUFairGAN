@@ -303,7 +303,7 @@ def train():
         df = pd.DataFrame({
             'epoch': epoch_log,
             'loss': loss_log,
-            'variance': variance_log
+            'variance': variance_log.flatten()
         })
         df.to_csv('outputs/bnn_medvit_base/train_log_medvit_base.csv')
         torch.save(model.state_dict(), f'outputs/bnn_medvit_base/medvit_mnist__base_wt{epoch}.pt')
