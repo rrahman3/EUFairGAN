@@ -98,7 +98,7 @@ from src.dataloader.medical_dataset import NIHChestXrayDataset
 
 train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
-        frac=1.00, isTest=False)
+        frac=.01, isTest=False)
 train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 validation_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv",
@@ -282,13 +282,23 @@ def train():
             
             loss_log.append(loss.item())
             epoch_log.append(epoch)
-            variance_log = torch.cat((variance_log, variance), 0)
+            variance_log = torch.cat((variance_log, torch.mean(variance)), 0)
             print(f'epoch {epoch}, batch {num_batch}: loss: {loss.item()}, variance: {torch.mean(variance)}')
             loss.backward()
             optimizer.step()
             num_batch += 1
         variance_log = variance_log.detach().cpu().numpy()
         print(f'Aleatoric Uncertainty: {np.mean(variance_log)}')
+        import pandas as pd
+        df = pd.DataFrame({
+            'epoch': epoch_log,
+            'loss': loss_log,
+            'variance': variance_log.flatten()
+        })
+        df.to_csv('outputs/bnn_medvit_base/train_log_medvit_base.csv')
+        torch.save(model.state_dict(), f'outputs/bnn_medvit_base/medvit_mnist__base_wt{epoch}.pt')
+        print('model saved')
+
 
         print("-----------------------------------------Validation-----------------------------------------")
         test(test_model=model, sensitive_group='val')
@@ -299,15 +309,7 @@ def train():
         print("-----------------------------------------Female Samples-----------------------------------------")
         test(test_model=model, sensitive_group='female')
         print("-----------------------------------------Female Samples-----------------------------------------")
-        import pandas as pd
-        df = pd.DataFrame({
-            'epoch': epoch_log,
-            'loss': loss_log,
-            'variance': variance_log.flatten()
-        })
-        df.to_csv('outputs/bnn_medvit_base/train_log_medvit_base.csv')
-        torch.save(model.state_dict(), f'outputs/bnn_medvit_base/medvit_mnist__base_wt{epoch}.pt')
-        print('model saved')
+
 
 
 
