@@ -19,11 +19,17 @@ from .MedViT import MedViT_small as tiny
 from .MedViT import MedViT_base as base
 from .MedViT import MedViT_large as large
 
+out_features = 20
+if out_features == 14:
+    is_MNIST_like = True
+else:
+    is_MNIST_like = False
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = base()
 
-model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
+model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=out_features, bias=True)
 
 model = model.to(device)
 
@@ -48,6 +54,7 @@ import torchvision.transforms as transforms
 NUM_EPOCHS = 100
 BATCH_SIZE = 32
 lr = 0.005
+
 
 # info = INFO[data_flag]
 # task = info['task']
@@ -96,17 +103,17 @@ from src.dataloader.medical_dataset import NIHChestXrayDataset
 
 train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
-        frac=1.00, isTest=False)
+        frac=1.00, isTest=False, is_MNIST_like=is_MNIST_like)
 train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 validation_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
-        frac=1.00, isTest=False)
+        frac=1.00, isTest=False, is_MNIST_like=is_MNIST_like)
 validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
         image_dir="data/nihcc_chest_xray/xray_images/", 
-        frac=1.00, isTest=False)
+        frac=1.00, isTest=True, is_MNIST_like=is_MNIST_like)
 
 test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
@@ -158,7 +165,7 @@ class MultiLabelEvaluator:
         }
 
 
-evaluator = MultiLabelEvaluator()
+evaluator = MultiLabelEvaluator(n_labels=out_features)
 # evaluation
 def test(test_model=None, model_pth=None, sensitive_group=None):
     if test_model == None and model_pth == None:
@@ -167,7 +174,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
 
     if model_pth is not None:
         test_model = base()
-        test_model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
+        test_model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=out_features, bias=True)
         test_model.load_model(model_pth)
         test_model = test_model.to(device)
 
@@ -241,7 +248,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
         # print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
         if sensitive_group == 'val':
             import pandas as pd
-            val_log_file = 'outputs/medvit_base/validation_log_medvit_base.csv'
+            val_log_file = f'outputs/medvit_base_{is_MNIST_like}/validation_log_medvit_base.csv'
             df = pd.DataFrame({
                 'loss': np.mean(np.array(loss_log))
             }, index=[0])
@@ -291,8 +298,8 @@ def train():
             'epoch': epoch_log,
             'loss': loss_log
         })
-        df.to_csv('outputs/medvit_base/train_log_medvit_base.csv')
-        torch.save(model.state_dict(), f'outputs/medvit_base/medvit_mnist__base_wt{epoch}.pt')
+        df.to_csv('outputs/medvit_base_{is_MNIST_like}/train_log_medvit_base.csv')
+        torch.save(model.state_dict(), f'outputs/medvit_base_{is_MNIST_like}/medvit_mnist__base_wt{epoch}.pt')
         print('model saved')
 
 

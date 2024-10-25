@@ -9,7 +9,7 @@ import numpy as np
 import torchvision
     
 class NIHChestXrayDataset(CustomDataset):
-    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None, isTest=False):
+    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None, isTest=False, is_MNIST_like=True):
         print("-------------------------------------------Loading NIHCC Chest Xray dataset------------------------------------------")
 
         self.image_dir = image_dir
@@ -42,6 +42,7 @@ class NIHChestXrayDataset(CustomDataset):
                                 (0.5, 0.5, 0.5)) 
         ])
         self.isTest = isTest
+        self.is_MNIST_like = is_MNIST_like
 
     def __len__(self):
         return len(self.metadata)
@@ -66,14 +67,8 @@ class NIHChestXrayDataset(CustomDataset):
         return sample['lr_image'], sample['y_label']
     
     def get_labels(self, idx):
-        labels_column = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
-                            'Effusion', 'Emphysema', 'Fibrosis', 'Hernia', 'Infiltration', 'Mass',
-                            'Nodule', 'Pleural Thickening', 'Pneumonia', 'Pneumothorax',
-                            'Pneumoperitoneum', 'Pneumomediastinum', 'Subcutaneous Emphysema',
-                            'Tortuous Aorta', 'Calcification of the Aorta', 'No Finding'
-                        ]
-        
-        labels_column = ['Atelectasis', 
+        if self.is_MNIST_like:    
+            labels_column = ['Atelectasis', 
                          'Cardiomegaly',
                          'Effusion', 
                          'Infiltration', 
@@ -88,6 +83,14 @@ class NIHChestXrayDataset(CustomDataset):
                          'Pleural Thickening', 
                          'Hernia', 
                     ]
+        else:
+            labels_column = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
+                            'Effusion', 'Emphysema', 'Fibrosis', 'Hernia', 'Infiltration', 'Mass',
+                            'Nodule', 'Pleural Thickening', 'Pneumonia', 'Pneumothorax',
+                            'Pneumoperitoneum', 'Pneumomediastinum', 'Subcutaneous Emphysema',
+                            'Tortuous Aorta', 'Calcification of the Aorta', 'No Finding'
+                        ]
+
 
         labels = self.metadata[labels_column].loc[idx]
         labels_numpy = np.array(labels).astype(np.float32)
