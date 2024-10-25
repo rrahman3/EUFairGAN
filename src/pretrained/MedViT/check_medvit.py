@@ -248,7 +248,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
         # print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
         if sensitive_group == 'val':
             import pandas as pd
-            val_log_file = f'outputs/medvit_base_{is_MNIST_like}/validation_log_medvit_base.csv'
+            val_log_file = f'outputs/medvit_base_{out_features}/validation_log_medvit_base.csv'
             df = pd.DataFrame({
                 'loss': np.mean(np.array(loss_log))
             }, index=[0])
@@ -298,8 +298,8 @@ def train():
             'epoch': epoch_log,
             'loss': loss_log
         })
-        df.to_csv('outputs/medvit_base_{is_MNIST_like}/train_log_medvit_base.csv')
-        torch.save(model.state_dict(), f'outputs/medvit_base_{is_MNIST_like}/medvit_mnist__base_wt{epoch}.pt')
+        df.to_csv('outputs/medvit_base_{out_features}/train_log_medvit_base.csv')
+        torch.save(model.state_dict(), f'outputs/medvit_base_{out_features}/medvit_mnist__base_wt{epoch}.pt')
         print('model saved')
 
 
