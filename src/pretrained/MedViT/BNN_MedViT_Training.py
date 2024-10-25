@@ -182,7 +182,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
     if sensitive_group == 'male':
         data_loader = male_test_loader
     elif sensitive_group == 'female':
-        data_loader = male_test_loader
+        data_loader = female_test_loader
     elif sensitive_group == 'val':
         data_loader = test_loader
     else:

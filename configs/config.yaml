@@ -26,7 +26,7 @@ check_medvit_test:
   model_pth: 'outputs/medvit_base/medvit_mnist__base_wt10.pt'
 
 check_bnn_medvit_test:
-  model_pth: 'outputs/bnn_medvit_base/medvit_mnist__base_wt10.pt'
+  model_pth: 'outputs/bnn_medvit_base/medvit_mnist__base_wt34.pt'
 
 test_bnn:
 
