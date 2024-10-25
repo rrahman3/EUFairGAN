@@ -461,7 +461,9 @@ class BNN_MedViT(BaseModel):
         self.norm = nn.BatchNorm2d(output_channel, eps=NORM_EPS)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.variance_dropout = nn.Dropout(0.50)
         self.variance = nn.Linear(output_channel, 1)
+
         self.proj_head = nn.Sequential(
             nn.Linear(output_channel, num_classes),
         )
@@ -500,7 +502,8 @@ class BNN_MedViT(BaseModel):
         x = self.norm(x)
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        var = self.variance(x)
+        var_drop = self.variance_dropout(x)
+        var = self.variance(var_drop)
         var = nn.functional.softplus(var)
         x = self.proj_head(x)
         return x, var

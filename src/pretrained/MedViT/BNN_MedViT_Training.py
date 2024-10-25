@@ -173,7 +173,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
         test_model.load_model(model_pth)
         test_model = test_model.to(device)
 
-    test_model.eval()
+    test_model.train()
     y_true = torch.tensor([]).to(device)
     y_score = torch.tensor([]).to(device)
     variance_log = torch.tensor([]).to(device)
