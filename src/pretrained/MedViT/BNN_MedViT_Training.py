@@ -110,11 +110,12 @@ test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_ch
         image_dir="data/nihcc_chest_xray/xray_images/", 
         frac=1.0, isTest=True)
 
+age_threshold = 65
 test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 # male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
 # female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False, num_workers=4)
-male_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(65, True), batch_size=32, shuffle=False, num_workers=4)
-female_test_loader = data.DataLoader(test_dataset.filter_by_gender(65, False), batch_size=32, shuffle=False, num_workers=4)
+male_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(age_threshold, True), batch_size=32, shuffle=False, num_workers=4)
+female_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(age_threshold, False), batch_size=32, shuffle=False, num_workers=4)
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, hamming_loss, roc_auc_score, precision_score, recall_score
