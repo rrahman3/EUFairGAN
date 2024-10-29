@@ -116,6 +116,9 @@ class NIHChestXrayDataset(CustomDataset):
         metadata['FullPath'] = metadata['id'].apply(lambda x: os.path.join(self.image_dir, str(x)))
         return metadata
     
+    def get_no_labels(self):
+        self.get_labels(idx)
+    
     def filter_by_NIH_age(self, age_threshold, below_threshold=True):
         if below_threshold:
            age_indices = self.metadata[self.metadata['Patient Age'] < age_threshold].index.tolist()
