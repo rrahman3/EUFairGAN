@@ -160,7 +160,12 @@ class MultiLabelEvaluator:
         f1 = f1_score(y_true, y_pred_bin, average='macro')
         
         # AUC-ROC (per label, then averaged)
-        auc_roc = roc_auc_score(y_true, y_pred, average='macro')
+        auc = 0
+        for i in range(y_true.shape[1]):
+            label_auc = roc_auc_score(y_true[:, i], y_pred[:, i])
+            auc += label_auc
+        auc_roc = auc / y_true.shape[1]
+        # auc_roc = roc_auc_score(y_true, y_pred, average='macro')
         
         # Return all metrics as a dictionary
         return {
