@@ -54,7 +54,8 @@ def main(args):
         model_pth = config[task_name]['model_pth']
         print(f'task: {args.task}')
         from src.pretrained.MedViT import BNN_MedViT_Training
-        print('Male Testing')
+        print("Age Testing")
+        # print('Male Testing')
         BNN_MedViT_Training.test(model_pth=model_pth, sensitive_group='male')
         print('Female Testing')
         BNN_MedViT_Training.test(model_pth=model_pth, sensitive_group='female')

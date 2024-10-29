@@ -111,8 +111,10 @@ test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_ch
         frac=1.0, isTest=True)
 
 test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
-male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
-female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False, num_workers=4)
+# male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
+# female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False, num_workers=4)
+male_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(65, True), batch_size=32, shuffle=False, num_workers=4)
+female_test_loader = data.DataLoader(test_dataset.filter_by_gender(65, False), batch_size=32, shuffle=False, num_workers=4)
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, hamming_loss, roc_auc_score, precision_score, recall_score
@@ -137,6 +139,16 @@ class MultiLabelEvaluator:
         
         # Accuracy (Subset accuracy): exact match of all labels
         accuracy = accuracy_score(y_true, y_pred_bin)
+
+        # y_true = y_true.squeeze()
+        # y_pred = y_pred.squeeze()
+
+        acc = 0
+        for label in range(y_true.shape[1]):
+            label_acc = accuracy_score(y_true[:, label], y_pred_bin[:, label])
+            acc += label_acc
+        accuracy = acc / y_true.shape[1]
+            
         
         # Hamming loss: fraction of labels that are incorrectly predicted
         h_loss = hamming_loss(y_true, y_pred_bin)
