@@ -2,6 +2,7 @@ from src.evaluations.evaluator import Evaluator
 import numpy as np
 import torch
 from scipy.special import softmax
+from tqdm import tqdm
 
 epsilon = 0.000001
 class MonteCarloPrediction:
