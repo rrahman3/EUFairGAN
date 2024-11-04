@@ -47,6 +47,14 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
             groups = config[split]['groups']
             if groups[0] == "male" or groups[0] =="female":
                 dataset = dataset.filter_by_gender(groups[group])
+            elif groups[0] == 'age':
+                age_threshold = int(groups[1])
+                if group == 0:
+                    dataset = dataset.filter_by_NIH_age(age_threshold=age_threshold, below_threshold=True)
+                elif group == 1:
+                    dataset = dataset.filter_by_NIH_age(age_threshold=age_threshold, below_threshold=False)
+                else:
+                    raise ValueError("group is not 0 or 1")
 
     elif dataset_name == "ChestMNIST":
         if split == 'train':

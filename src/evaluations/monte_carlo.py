@@ -53,6 +53,8 @@ class MonteCarloPrediction:
                         print(f'{images.shape}, {y.shape}')
                 else:
                     raise ValueError(f"Unexpected batch size: {len(batch_data)}")
+                
+                num_batch += 1
             
                 self.model.train()
 

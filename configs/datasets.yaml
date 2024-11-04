@@ -50,7 +50,7 @@ datasets:
       batch_size: 32
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
-      groups: ['male', 'female']
+      groups: ['age', '65']
 
   UTKFace:
     train:
