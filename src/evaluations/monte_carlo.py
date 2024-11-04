@@ -10,7 +10,8 @@ class MonteCarloPrediction:
         self.dataloader = dataloader
         self.N = N
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.evaluation_metrics = MonteCarloEvaluator()
+        self.evaluation_metrics = MultiLabelEvaluator()
+        self.task = 'multi=label'
 
     def get_prediction(self, images, genders):
         y_pred, y_var = self.model(images, genders)
@@ -25,7 +26,12 @@ class MonteCarloPrediction:
 
 
     def asfsdgd(self):
+        y_true = torch.tensor([]).to(self.device)
+        y_score = torch.tensor([]).to(self.device)
+        y_au_score = torch.tensor([]).to(self.device)
+
         with torch.no_grad():
+            
             for batch, (images, genders, y)  in enumerate(self.dataloader):
                 self.model.train()
                 images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
@@ -35,6 +41,7 @@ class MonteCarloPrediction:
                 # Compute prediction and loss
                 y_pred_N = np.empty((images.shape[0], self.N, y.shape[-1])) #(batch_size, N, num_classes)
                 y_var_N = np.empty((images.shape[0], self.N, 1))
+
                 for i in range(1, self.N+1):
                     y_pred, y_var = self.get_prediction(images=images, genders=genders) #(batch_size, 1, num_classes)
 
@@ -42,22 +49,33 @@ class MonteCarloPrediction:
                     y_pred_N[:, i - 1, :] = y_pred[:, 0, :]  # Using [0] to get rid of the added dimension
                     y_var_N[:, i - 1, :] = y_var[:, 0, :]
 
+
+
                 y_pred_mean = np.mean(np.array(y_pred_N), axis=1) #(batch, num_classes)
-                y_pred_softmax = softmax(y_pred_mean, axis=1)
+                if self.task == 'multi-label':
+                    y_pred_softmax = torch.sigmoid(y_pred_mean, axis=1)
+                else:
+                    y_pred_softmax = softmax(y_pred_mean, axis=1)
+
+                y_true = torch.cat((y_true, y_pred_mean), 0)
+                y_score = torch.cat((y_score, y_pred_softmax), 0)
 
                 y_var_mean = np.mean(np.array(y_var_N), axis=1) #(batch, 1)
+                y_au_score = torch.cat((y_au_score, y_var_mean), 0)
 
-                epistemic_uncertainty = np.apply_along_axis(self.predictive_entropy, axis=1, arr=y_pred_softmax) #(batch_size, 1), epistemic uncertainty of each user
-                aleatoric_uncertainty = y_var_mean #(batch, 1)
 
-                # update evaluation metrics
-                self.evaluation_metrics.update_metrics(y_true=y, y_pred=y_pred_softmax)
-                self.evaluation_metrics.update_variance(variance=aleatoric_uncertainty)
-                self.evaluation_metrics.update_entropy(entropy=epistemic_uncertainty)
+                # # update evaluation metrics
+                # self.evaluation_metrics.update_metrics(y_true=y, y_pred=y_pred_softmax)
+                # self.evaluation_metrics.update_variance(variance=aleatoric_uncertainty)
+                # self.evaluation_metrics.update_entropy(entropy=epistemic_uncertainty)
 
-            epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
-            self.evaluation_metrics.print_metrics()
-            
+            # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+            # self.evaluation_metrics.print_metrics()
+            epistemic_uncertainty = np.apply_along_axis(self.predictive_entropy, axis=1, arr=y_score) #(batch_size, 1), epistemic uncertainty of each user
+            aleatoric_uncertainty = np.mean(y_au_score) #(batch, 1)
+            print(f'"Aleatoric Uncertainty":{aleatoric_uncertainty}\n"Epistemic Uncertainty":{epistemic_uncertainty}')
+            result = self.evaluation_metrics.evaluate(y_true=y_true, y_score=y_score)
+            print(result)
 
     def predictive_entropy(self, prob):
         return -1 * np.sum(np.log(prob+epsilon) * (prob)) # entropy of class distribution
@@ -66,12 +84,69 @@ class MonteCarloPrediction:
 # evaluations/evaluator.py
 
 import torch
-from sklearn.metrics import f1_score, roc_auc_score, accuracy_score, confusion_matrix
+from sklearn.metrics import f1_score, roc_auc_score, accuracy_score, confusion_matrix, precision_score, recall_score, hamming_loss
 import numpy as np
 from math import log10
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 
+class MultiLabelEvaluator:
+    def __init__(self, n_labels=14, threshold=0.5):
+        self.n_labels = n_labels  # Number of labels per sample
+        self.threshold = threshold  # Threshold for binary classification
+
+    def apply_threshold(self, y_pred):
+        """
+        Apply threshold to the predicted probabilities to convert to binary labels.
+        """
+        return (y_pred >= self.threshold).astype(int)
+
+    def evaluate(self, y_pred, y_true):
+        """
+        Evaluate model performance using various multi-label classification metrics.
+        """
+        # Apply threshold to convert probabilities to binary labels
+        y_pred_bin = self.apply_threshold(y_pred)
+        
+        # Accuracy (Subset accuracy): exact match of all labels
+        accuracy = accuracy_score(y_true, y_pred_bin)
+
+        # y_true = y_true.squeeze()
+        # y_pred = y_pred.squeeze()
+
+        acc = 0
+        for label in range(y_true.shape[1]):
+            label_acc = accuracy_score(y_true[:, label], y_pred_bin[:, label])
+            acc += label_acc
+        accuracy = acc / y_true.shape[1]
+            
+        
+        # Hamming loss: fraction of labels that are incorrectly predicted
+        h_loss = hamming_loss(y_true, y_pred_bin)
+        
+        # Precision, Recall, F1 Score (Macro average across labels)
+        precision = precision_score(y_true, y_pred_bin, average='macro')
+        recall = recall_score(y_true, y_pred_bin, average='macro')
+        f1 = f1_score(y_true, y_pred_bin, average='macro')
+        
+        # AUC-ROC (per label, then averaged)
+        auc = 0
+        for i in range(y_true.shape[1]):
+            label_auc = roc_auc_score(y_true[:, i], y_pred[:, i])
+            auc += label_auc
+        auc_roc = auc / y_true.shape[1]
+        # auc_roc = roc_auc_score(y_true, y_pred, average='macro')
+        
+        # Return all metrics as a dictionary
+        return {
+            "accuracy": accuracy,
+            "hamming_loss": h_loss,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1,
+            "auc_roc": auc_roc
+        }
+    
 class MonteCarloEvaluator:
     def __init__(self):
         self.reset_metrics()
