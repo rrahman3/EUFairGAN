@@ -21,11 +21,11 @@ class MonteCarloPrediction:
         else:
             y_pred, y_var = self.model(images, genders)
 
-        # y_pred = y_pred.detach().cpu().numpy()
-        # y_pred = y_pred[:, np.newaxis, :]
+        y_pred = y_pred.detach().cpu().numpy()
+        y_pred = y_pred[:, np.newaxis, :]
 
-        # y_var = y_var.detach().cpu().numpy()
-        # y_var = y_var[:, np.newaxis, :]
+        y_var = y_var.detach().cpu().numpy()
+        y_var = y_var[:, np.newaxis, :]
 
         return y_pred, y_var
 
@@ -75,11 +75,11 @@ class MonteCarloPrediction:
                 else:
                     y_pred_softmax = softmax(y_pred_mean, axis=1)
 
-                y_true = torch.cat((y_true, y_pred_mean), 0)
-                y_score = torch.cat((y_score, y_pred_softmax), 0)
+                y_true = torch.cat((y_true, torch.tensor(y, device=y_true.device)), 0)
+                y_score = torch.cat((y_score, torch.tensor(y_pred_softmax, device=y_score.device)), 0)
 
                 y_var_mean = np.mean(np.array(y_var_N), axis=1) #(batch, 1)
-                y_au_score = torch.cat((y_au_score, y_var_mean), 0)
+                y_au_score = torch.cat((y_au_score, torch.tensor(y_var_mean, device=y_au_score.device)), 0)
 
 
                 # # update evaluation metrics
