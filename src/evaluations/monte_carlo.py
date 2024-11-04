@@ -21,11 +21,11 @@ class MonteCarloPrediction:
         else:
             y_pred, y_var = self.model(images, genders)
 
-        y_pred = y_pred.detach().cpu().numpy()
-        y_pred = y_pred[:, np.newaxis, :]
+        # y_pred = y_pred.detach().cpu().numpy()
+        # y_pred = y_pred[:, np.newaxis, :]
 
-        y_var = y_var.detach().cpu().numpy()
-        y_var = y_var[:, np.newaxis, :]
+        # y_var = y_var.detach().cpu().numpy()
+        # y_var = y_var[:, np.newaxis, :]
 
         return y_pred, y_var
 
