@@ -28,6 +28,15 @@ def model_factory(model_name, models_config):
         model = base()  
         # for NIHCC Chest Xray, out_features = 20
         model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=model_info['params']['num_classes'], bias=True)
+    elif model_info['model_class'] == "BNN_MedViT":
+        from src.pretrained.MedViT.BNN_MedViT import MedViT_small as tiny
+        from src.pretrained.MedViT.BNN_MedViT import MedViT_base as base
+        from src.pretrained.MedViT.BNN_MedViT import MedViT_large as large
+
+        model = base()  
+        # for NIHCC Chest Xray, out_features = 20
+        model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=model_info['params']['num_classes'], bias=True)
+
     else:
         model_class = globals()[model_info['model_class']]  # Dynamically load class
         model = model_class(num_classes=model_info['params']['num_classes'])
