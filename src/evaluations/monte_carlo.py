@@ -3,6 +3,8 @@ import numpy as np
 import torch
 from scipy.special import softmax
 
+from tqdm import tqdm
+
 epsilon = 0.000001
 class MonteCarloPrediction:
     def __init__(self, model, dataloader, N=100):
@@ -13,8 +15,8 @@ class MonteCarloPrediction:
         self.evaluation_metrics = MultiLabelEvaluator()
         self.task = 'multi=label'
 
-    def get_prediction(self, images, genders):
-        y_pred, y_var = self.model(images, genders)
+    def get_prediction(self, images):
+        y_pred, y_var = self.model(images)
 
         y_pred = y_pred.detach().cpu().numpy()
         y_pred = y_pred[:, np.newaxis, :]
@@ -32,18 +34,19 @@ class MonteCarloPrediction:
 
         with torch.no_grad():
             
-            for batch, (images, genders, y)  in enumerate(self.dataloader):
+            for batch, (images, y)  in tqdm(self.dataloader):
+
                 self.model.train()
-                images, genders, y = images.to(self.device), genders.to(self.device), y.to(self.device)
+                images, y = images.to(self.device), y.to(self.device)
                 if batch == 0:
-                    print(f'{images.shape}, {genders.shape}, {y.shape}')
+                    print(f'{images.shape}, {y.shape}')
 
                 # Compute prediction and loss
                 y_pred_N = np.empty((images.shape[0], self.N, y.shape[-1])) #(batch_size, N, num_classes)
                 y_var_N = np.empty((images.shape[0], self.N, 1))
 
                 for i in range(1, self.N+1):
-                    y_pred, y_var = self.get_prediction(images=images, genders=genders) #(batch_size, 1, num_classes)
+                    y_pred, y_var = self.get_prediction(images=images) #(batch_size, 1, num_classes)
 
                     # Store the predictions and variances at the current iteration index (i-1)
                     y_pred_N[:, i - 1, :] = y_pred[:, 0, :]  # Using [0] to get rid of the added dimension
