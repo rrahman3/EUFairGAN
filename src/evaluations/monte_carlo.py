@@ -89,7 +89,7 @@ class MonteCarloPrediction:
 
             # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
             # self.evaluation_metrics.print_metrics()
-            y_pred = y_pred.detach().cpu().numpy()
+            y_score = y_score.detach().cpu().numpy()
             y_true = y_true.detach().cpu().numpy()
             y_au_score = y_au_score.detach().cpu().numpy()
 
