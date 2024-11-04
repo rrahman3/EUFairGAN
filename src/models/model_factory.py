@@ -21,9 +21,9 @@ def model_factory(model_name, models_config):
     print(model_info)
 
     if model_info['model_class'] == "MedViT":
-        from src.pretrained.MedViT.MedViT import MedViT_small as tiny
-        from src.pretrained.MedViT.MedViT import MedViT_base as base
-        from src.pretrained.MedViT.MedViT import MedViT_large as large
+        from src.pretrained.MedViT.MedViT import BNN_MedViT_small as tiny
+        from src.pretrained.MedViT.MedViT import BNN_MedViT_base as base
+        from src.pretrained.MedViT.MedViT import BNN_MedViT_large as large
 
         model = base()  
         # for NIHCC Chest Xray, out_features = 20
