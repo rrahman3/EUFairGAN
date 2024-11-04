@@ -84,7 +84,7 @@ def main(args):
         model = model_factory(model_name=model_name, models_config=models_config)
         print(model)
 
-
+        N_MonteCarloSimulation = config['N_MonteCarloSimulation']
         
         if task_name == 'train_bnn':
 
@@ -107,11 +107,11 @@ def main(args):
             model.load_model(model_saved_location)        
 
             print('Male test')
-            male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader)
+            male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
             male_monte_carlo.asfsdgd()
 
             print('Female test')
-            female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader)
+            female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
             female_monte_carlo.asfsdgd()
 
     

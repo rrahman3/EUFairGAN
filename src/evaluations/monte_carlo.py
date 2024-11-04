@@ -89,6 +89,10 @@ class MonteCarloPrediction:
 
             # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
             # self.evaluation_metrics.print_metrics()
+            y_pred = y_pred.detach().cpu().numpy()
+            y_true = y_true.detach().cpu().numpy()
+            y_au_score = y_au_score.detach().cpu().numpy()
+
             epistemic_uncertainty = np.apply_along_axis(self.predictive_entropy, axis=1, arr=y_score) #(batch_size, 1), epistemic uncertainty of each user
             aleatoric_uncertainty = np.mean(y_au_score) #(batch, 1)
             print(f'"Aleatoric Uncertainty":{aleatoric_uncertainty}\n"Epistemic Uncertainty":{epistemic_uncertainty}')

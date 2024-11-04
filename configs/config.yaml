@@ -28,6 +28,8 @@ check_medvit_test:
 check_bnn_medvit_test:
   model_pth: 'outputs/bnn_medvit_base/medvit_mnist__base_wt34.pt'
 
+N_MonteCarloSimulation: 5
+
 test_bnn:
 
   medvit_test:
