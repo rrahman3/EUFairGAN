@@ -21,6 +21,8 @@ class MonteCarloPrediction:
         else:
             y_pred, y_var = self.model(images, genders)
 
+        
+
         y_pred = y_pred.detach().cpu().numpy()
         y_pred = y_pred[:, np.newaxis, :]
 
@@ -28,6 +30,8 @@ class MonteCarloPrediction:
         y_var = y_var[:, np.newaxis, :]
 
         return y_pred, y_var
+    
+
 
 
     def asfsdgd(self):
