@@ -51,7 +51,15 @@ class CheXpertDataset(CustomDataset):
     def __getitem__(self, idx):
         img_name = self.metadata.FullPath[idx]
         # image = Image.open(img_name)
-        image = Image.open(img_name).convert('RGB')
+        try:
+            # Attempt to open the image file
+            image = Image.open(img_name).convert('RGB')
+        except (FileNotFoundError, IOError) as e:
+            print(f"Warning: Unable to open image {img_name}. Error: {e}")
+            # You could either skip this item or return a placeholder image
+            # Option 1: Return None (handle in the DataLoader or calling code)
+            return None, None
+        
         # lr_image = self._process_raw_image(image, self.image_dim)
         lr_image = self.test_transform(image) if self.isTest else self.train_transform(image)
 
@@ -67,6 +75,8 @@ class CheXpertDataset(CustomDataset):
         
         return sample['lr_image'], sample['y_label']
     
+
+
     def get_labels(self, idx):
         # 'Path', 'Sex', 'Age', 'Frontal/Lateral', 'AP/PA', 
         

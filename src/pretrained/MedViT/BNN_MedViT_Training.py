@@ -111,26 +111,30 @@ from src.dataloader.medical_dataset import NIHChestXrayDataset
 #         frac=1.0, isTest=True)
 
 from src.dataloader.chexpert_dataset import CheXpertDataset
+def collate_fn(batch):
+    batch = [item for item in batch if item[0] is not None]
+    return torch.utils.data.dataloader.default_collate(batch)
+
 train_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/train.csv",
         image_dir="data/", 
         frac=1.0, isTest=False)
-train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
+train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4, collate_fn=collate_fn)
 
 validation_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/valid.csv",
         image_dir="data/", 
         frac=1.0, isTest=False)
-validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4)
+validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4, collate_fn=collate_fn)
 
 test_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/valid.csv",
         image_dir="data/", 
         frac=1.0, isTest=True)
 
 age_threshold = 65
-test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
+test_loader = data.DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4, collate_fn=collate_fn)
 # male_test_loader = data.DataLoader(test_dataset.filter_by_gender('male'), batch_size=32, shuffle=False, num_workers=4)
 # female_test_loader = data.DataLoader(test_dataset.filter_by_gender('female'), batch_size=32, shuffle=False, num_workers=4)
-male_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(age_threshold, True), batch_size=32, shuffle=False, num_workers=4)
-female_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(age_threshold, False), batch_size=32, shuffle=False, num_workers=4)
+male_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(age_threshold, True), batch_size=32, shuffle=False, num_workers=4, collate_fn=collate_fn)
+female_test_loader = data.DataLoader(test_dataset.filter_by_NIH_age(age_threshold, False), batch_size=32, shuffle=False, num_workers=4, collate_fn=collate_fn)
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, hamming_loss, roc_auc_score, precision_score, recall_score
