@@ -215,6 +215,10 @@ class MultiLabelEvaluator:
     def print_metrics(self):
         print(f"ROC AUC: {self.epoch_metrics['auc_roc']:.4f}", end='\t')
         print(f"Accuracy: {self.epoch_metrics['accuracy']:.4f}", end='\t')
+        print(f"F1 Score: {self.epoch_metrics['f1_score']:.4f}", end='\t')
+        print(f"Recall: {self.epoch_metrics['recall']:.4f}", end='\t')
+        print(f"Precision: {self.epoch_metrics['precision']:.4f}", end='\t')
+        print(f"Hamming Loss: {self.epoch_metrics['hamming_loss']:.4f}", end='\t')
         print(f"Aleatoric Uncertainty: {self.epoch_metrics['aleatoric']:.5f}", end='\n')
 
 

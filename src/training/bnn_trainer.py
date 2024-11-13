@@ -54,8 +54,8 @@ class Trainer:
         for epoch in range(1, self.num_epochs+1):
             print(f"Epoch [{epoch}/{self.num_epochs}]")
 
-            train_loss, train_metrics = self.train_epoch(epoch=epoch)
             val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
+            train_loss, train_metrics = self.train_epoch(epoch=epoch)
 
             model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
             self.model.save_model(model_saved_path)

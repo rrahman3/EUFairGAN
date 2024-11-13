@@ -32,10 +32,12 @@ def model_factory(model_name, models_config):
         from src.pretrained.MedViT.BNN_MedViT import BNN_MedViT_small as tiny
         from src.pretrained.MedViT.BNN_MedViT import BNN_MedViT_base as base
         from src.pretrained.MedViT.BNN_MedViT import BNN_MedViT_large as large
+        model_pth = 'outputs/bnn_medvit_base_nihcccheset/medvit_mnist__base_wt74.pt'
 
         model = base()  
         # for NIHCC Chest Xray, out_features = 20
         model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=model_info['params']['num_classes'], bias=True)
+        model.load_model(model_pth)
 
     else:
         model_class = globals()[model_info['model_class']]  # Dynamically load class
