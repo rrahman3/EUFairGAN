@@ -96,18 +96,33 @@ optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
 from src.dataloader.medical_dataset import NIHChestXrayDataset
 
-train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
-        image_dir="data/nihcc_chest_xray/xray_images/", 
+# train_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv",
+#         image_dir="data/nihcc_chest_xray/xray_images/", 
+#         frac=1.0, isTest=False)
+# train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
+
+# validation_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv",
+#         image_dir="data/nihcc_chest_xray/xray_images/", 
+#         frac=1.0, isTest=False)
+# validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4)
+
+# test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
+#         image_dir="data/nihcc_chest_xray/xray_images/", 
+#         frac=1.0, isTest=True)
+
+from src.dataloader.chexpert_dataset import CheXpertDataset
+train_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/train.csv",
+        image_dir="data/", 
         frac=1.0, isTest=False)
 train_loader = data.DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
-validation_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_validation_samples.csv",
-        image_dir="data/nihcc_chest_xray/xray_images/", 
+validation_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/valid.csv",
+        image_dir="data/", 
         frac=1.0, isTest=False)
 validation_loader = data.DataLoader(validation_dataset, batch_size=32, shuffle=True, num_workers=4)
 
-test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv",
-        image_dir="data/nihcc_chest_xray/xray_images/", 
+test_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/valid.csv",
+        image_dir="data/", 
         frac=1.0, isTest=True)
 
 age_threshold = 65

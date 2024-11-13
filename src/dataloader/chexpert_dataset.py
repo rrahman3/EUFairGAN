@@ -68,29 +68,24 @@ class CheXpertDataset(CustomDataset):
         return sample['lr_image'], sample['y_label']
     
     def get_labels(self, idx):
-        if self.is_MNIST_like:    
-            labels_column = ['Atelectasis', 
-                         'Cardiomegaly',
-                         'Effusion', 
-                         'Infiltration', 
-                         'Mass',
-                         'Nodule', 
-                         'Pneumonia', 
-                         'Pneumothorax',
-                         'Consolidation',
-                         'Edema',
-                         'Emphysema', 
-                         'Fibrosis', 
-                         'Pleural Thickening', 
-                         'Hernia', 
-                    ]
-        else:
-            labels_column = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema',
-                            'Effusion', 'Emphysema', 'Fibrosis', 'Hernia', 'Infiltration', 'Mass',
-                            'Nodule', 'Pleural Thickening', 'Pneumonia', 'Pneumothorax',
-                            'Pneumoperitoneum', 'Pneumomediastinum', 'Subcutaneous Emphysema',
-                            'Tortuous Aorta', 'Calcification of the Aorta', 'No Finding'
-                        ]
+        # 'Path', 'Sex', 'Age', 'Frontal/Lateral', 'AP/PA', 
+        
+        labels_column = [
+            'No Finding',
+            'Enlarged Cardiomediastinum', 
+            'Cardiomegaly', 
+            'Lung Opacity',
+            'Lung Lesion', 
+            'Edema', 
+            'Consolidation', 
+            'Pneumonia', 
+            'Atelectasis',
+            'Pneumothorax', 
+            'Pleural Effusion', 
+            'Pleural Other', 
+            'Fracture',
+            'Support Devices'    
+        ]
 
 
         labels = self.metadata[labels_column].loc[idx]
@@ -112,30 +107,29 @@ class CheXpertDataset(CustomDataset):
     def _process_csv(self):
         metadata = pd.read_csv(self.metadata_file)
         print(metadata.columns)        
-        # metadata = metadata.replace(-1, 0)
-        metadata['FullPath'] = metadata['id'].apply(lambda x: os.path.join(self.image_dir, str(x)))
+        metadata = metadata.replace(-1, 0)
+        metadata = metadata.fillna(0)
+        metadata['FullPath'] = metadata['Path'].apply(lambda x: os.path.join(self.image_dir, str(x)))
         return metadata
-    
-    def get_no_labels(self, idx):
-        self.get_labels(idx)
+
     
     def filter_by_NIH_age(self, age_threshold, below_threshold=True):
         if below_threshold:
-           age_indices = self.metadata[self.metadata['Patient Age'] < age_threshold].index.tolist()
+           age_indices = self.metadata[self.metadata['Age'] < age_threshold].index.tolist()
         else:
-            age_indices = self.metadata[self.metadata['Patient Age'] >= age_threshold].index.tolist()
+            age_indices = self.metadata[self.metadata['Age'] >= age_threshold].index.tolist()
         return torch.utils.data.Subset(self, age_indices)
 
 
     def filter_by_gender(self, gender_type):        
         if gender_type == 'male':
-            gender_value = 'M'
+            gender_value = 'Male'
         elif gender_type == 'female':
-            gender_value = 'F'
+            gender_value = 'Female'
         else:
             raise Exception(f"Invalid gender type: {gender_type}") 
                
-        gender_indices = self.metadata[self.metadata['Patient Gender'] == gender_value].index.tolist()
+        gender_indices = self.metadata[self.metadata['Sex'] == gender_value].index.tolist()
         return torch.utils.data.Subset(self, gender_indices)
     
     def filter_dataset(self, column_name, column_value): #column_name == Male, column value 0 for female, 1, for male       
