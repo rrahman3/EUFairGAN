@@ -65,9 +65,9 @@ test_dataset = NIHChestXrayDataset(metadata_file="data/nihcc_chest_xray/nihcc_ch
         frac=1.0, isTest=True)
 
 # from src.dataloader.chexpert_dataset import CheXpertDataset
-# def collate_fn(batch):
-#     batch = [item for item in batch if item[0] is not None]
-#     return torch.utils.data.dataloader.default_collate(batch)
+def collate_fn(batch):
+    batch = [item for item in batch if item[0] is not None]
+    return torch.utils.data.dataloader.default_collate(batch)
 
 # train_dataset = CheXpertDataset(metadata_file="data/CheXpert-v1.0/train.csv",
 #         image_dir="data/", 
