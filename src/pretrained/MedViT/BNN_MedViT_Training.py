@@ -20,7 +20,7 @@ from .BNN_MedViT import BNN_MedViT_base as base
 from .BNN_MedViT import BNN_MedViT_large as large
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model_pth = 'outputs/bnn_medvit_base/medvit_mnist__base_wt49.pt'
+model_pth = 'outputs/bnn_medvit_base_nihcccheset/medvit_mnist__base_wt74.pt'
 model = base()
 model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
 model.load_model(model_pth)
