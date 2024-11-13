@@ -20,11 +20,10 @@ from .BNN_MedViT import BNN_MedViT_base as base
 from .BNN_MedViT import BNN_MedViT_large as large
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+model_pth = 'outputs/bnn_medvit_base/medvit_mnist__base_wt49.pt'
 model = base()
-
 model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=14, bias=True)
-
+model.load_model(model_pth)
 model = model.to(device)
 
 
@@ -241,6 +240,19 @@ def train():
     epoch_log = []
     epoch_loss = 0
     for epoch in range(NUM_EPOCHS):
+
+        if (epoch+1) % 1 == 0:
+            print("-----------------------------------------Validation-----------------------------------------")
+            test(test_model=model, sensitive_group='val')
+            print("-----------------------------------------Validation-----------------------------------------")
+            print("-----------------------------------------Male Samples-----------------------------------------")
+            test(test_model=model, sensitive_group='male')
+            print("-----------------------------------------Male Samples-----------------------------------------")
+            print("-----------------------------------------Female Samples-----------------------------------------")
+            test(test_model=model, sensitive_group='female')
+            print("-----------------------------------------Female Samples-----------------------------------------")
+
+
         variance_log = torch.tensor([]).to(device)
         epoch_loss = 0
         print('Epoch [%d/%d]'% (epoch+1, NUM_EPOCHS))
@@ -277,16 +289,7 @@ def train():
         torch.save(model.state_dict(), f'outputs/bnn_medvit_base/medvit_mnist__base_wt{epoch}.pt')
         print('model saved')
 
-        if (epoch+1) % 5 == 0:
-            print("-----------------------------------------Validation-----------------------------------------")
-            test(test_model=model, sensitive_group='val')
-            print("-----------------------------------------Validation-----------------------------------------")
-            print("-----------------------------------------Male Samples-----------------------------------------")
-            test(test_model=model, sensitive_group='male')
-            print("-----------------------------------------Male Samples-----------------------------------------")
-            print("-----------------------------------------Female Samples-----------------------------------------")
-            test(test_model=model, sensitive_group='female')
-            print("-----------------------------------------Female Samples-----------------------------------------")
+
 
 
 

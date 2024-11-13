@@ -3,7 +3,7 @@ datasets:
     train:
       metadata_file: "data/CheXpert-v1.0/train.csv"
       img_dir: "data/"
-      frac: 1
+      frac: .5
       batch_size: 32
       img_dim: (224, 224)
       shuffle: True
@@ -56,7 +56,7 @@ datasets:
     train:
       metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv"
       img_dir: "data/nihcc_chest_xray/xray_images/"
-      frac: 1
+      frac: .5
       batch_size: 32
       img_dim: (224, 224)
       shuffle: True
