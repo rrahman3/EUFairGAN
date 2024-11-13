@@ -198,7 +198,7 @@ class MultiLabelEvaluator:
             y_pred_label = (y_pred_label >= 0.5).astype('float')
             
             cm = confusion_matrix(y_true_label, y_pred_label)
-            print(f"Confusion matrix for label {i}: {cm}")
+            print(f"Confusion matrix for label {i}: \n{cm}")
         
         # Return all metrics as a dictionary
         self.epoch_metrics = {
