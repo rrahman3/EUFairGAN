@@ -5,8 +5,8 @@ from src.models.cnn_model import CNNModel
 from src.models.transformer_model import ViT, ViT2
 from src.pretrained.MedViT import MedViT
 # from src.models.medical_transformer import MedViT
-from src.training.trainer import Trainer
-from src.training.traditional_trainer import TraditionalTrainer
+# from src.training.trainer import Trainer
+from src.training.bnn_trainer import Trainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory
@@ -90,7 +90,7 @@ def main(args):
 
             # Initialize Trainer
             print(f"Training {model_name} on {dataset_name}...")
-            trainer = TraditionalTrainer(
+            trainer = Trainer(
                 model=model,
                 dataloader=train_loader,
                 config=config

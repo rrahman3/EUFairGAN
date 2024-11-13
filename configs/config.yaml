@@ -13,13 +13,13 @@ temp_training:
   learning_rate: 0.001
   num_epochs: 100
   optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
-  loss_function: "cross_entropy"  # Specify the loss function
+  loss_function: "bnn_binary_cross_entropy"  # Specify the loss function
 
 training:
   learning_rate: 0.005
   num_epochs: 100
   optimizer: "adam"  # Specify the optimizer to use (e.g., adam, sgd)
-  loss_function: "nn.CrossEntropyLoss"  # Specify the loss function
+  loss_function: "bnn_binary_cross_entropy"  # Specify the loss function
 
 
 check_medvit_test:

@@ -36,56 +36,10 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-# import medmnist
-# from medmnist import INFO, Evaluator
-
-# data_flag = 'breastmnist'
-# data_flag = 'chestmnist'
-# # [tissuemnist, pathmnist, chestmnist, dermamnist, octmnist, 
-# # pnemoniamnist, retinamnist, breastmnist, bloodmnist, tissuemnist, organamnist, organcmnist, organsmnist]
-# download = True
-
 NUM_EPOCHS = 100
 BATCH_SIZE = 32
 lr = 0.005
 
-# info = INFO[data_flag]
-# task = info['task']
-# n_channels = info['n_channels']
-# n_classes = len(info['label'])
-
-# DataClass = getattr(medmnist, info['python_class'])
-
-
-# from torchvision.transforms.transforms import Resize
-# # preprocessing
-# train_transform = transforms.Compose([
-#     transforms.Resize(224),
-#     transforms.Lambda(lambda image: image.convert('RGB')),
-#     torchvision.transforms.AugMix(),
-#     transforms.ToTensor(),
-#     transforms.Normalize(mean=[.5], std=[.5])
-# ])
-# test_transform = transforms.Compose([
-#     transforms.Resize(224),
-#     transforms.Lambda(lambda image: image.convert('RGB')),
-#     transforms.ToTensor(),
-#     transforms.Normalize(mean=[.5], std=[.5])
-# ])
-
-# # load the data
-# train_dataset = DataClass(split='train', transform=train_transform, download=download)
-# test_dataset = DataClass(split='test', transform=test_transform, download=download)
-
-# # pil_dataset = DataClass(split='train', download=download)
-
-# # encapsulate data into dataloader form
-# train_loader = data.DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-# train_loader_at_eval = data.DataLoader(dataset=train_dataset, batch_size=2*BATCH_SIZE, shuffle=False)
-# test_loader = data.DataLoader(dataset=test_dataset, batch_size=2*BATCH_SIZE, shuffle=False)
-
-# define loss function and optimizer
-# if task == "multi-label, binary-class":
 
 from src.utils.losses import BNN_BCEWithLogitsLoss
 criterion = BNN_BCEWithLogitsLoss
@@ -268,21 +222,7 @@ def test(test_model=None, model_pth=None, sensitive_group=None):
             cm = confusion_matrix(y_true_label, y_pred_label)
             print(f"Confusion matrix for label {i}:")
             print(cm)
-        # print(f"--------------------------F1 Score------------------------------:")
-        # f1 = f1_score(y_true, y_score, average='micro')
-        # print(f"F1 Score: {f1}")
-        
-        # print(f"--------------------------AUC Score------------------------------:")
-        # if len(np.unique(y_true)) == 2:
-        #     auc = roc_auc_score(labels_binary, pred_sigmoid.detach().cpu().numpy(), multi_class='ovo')
-        #     print(f"ROC AUC: {auc}")
-        # else:
-        #     print("Only one class present in y_true. Skipping AUC calculation.")
 
-        # evaluator = Evaluator(data_flag, split)
-        # metrics = evaluator.evaluate(y_score)
-    
-        # print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
         if sensitive_group == 'val':
             import pandas as pd
             val_log_file = 'outputs/bnn_medvit_base/validation_log_medvit_base.csv'
