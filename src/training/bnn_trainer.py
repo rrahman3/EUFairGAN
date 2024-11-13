@@ -80,7 +80,7 @@ class Trainer:
 
             # Compute prediction and loss
             pred, var = self.model(images)
-            loss = self.loss_function(y, pred, var)
+            loss = self.loss_function(pred, y, var)
             running_loss += loss.item()
 
             # Backpropagation
@@ -110,7 +110,7 @@ class Trainer:
 
                 # Compute prediction and loss
                 pred, var = self.model(images)
-                loss = self.loss_function(y, pred, var)
+                loss = self.loss_function(pred, y, var)
                 running_loss += loss.item()
 
                 self.evaluation_metrics.update_metrics(batch_y_true=y, batch_y_pred=pred, batch_y_variance=var)
