@@ -11,11 +11,12 @@ datasets:
     test:
       metadata_file: "data/CheXpert-v1.0/valid.csv"
       img_dir: "data/"
-      frac: 1
-      batch_size: 32
+      frac: 1.00
       img_dim: (224, 224)
+      batch_size: 32
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
+      groups: ['age', '65']  # Number of subprocesses for data loading
     val:
       metadata_file: "data/CheXpert-v1.0/valid.csv"
       img_dir: "data/"
