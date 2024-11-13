@@ -148,7 +148,7 @@ class MultiLabelEvaluator:
         """
         return (y_pred >= self.threshold).astype(int)
 
-    def compute_epoch_metrics(self, epoch_y_pred, epoch_y_true, epoch_y_au_score):
+    def compute_epoch_metrics(self, epoch_y_pred=None, epoch_y_true=None, epoch_y_au_score=None):
         """
         Evaluate model performance using various multi-label classification metrics.
         """
