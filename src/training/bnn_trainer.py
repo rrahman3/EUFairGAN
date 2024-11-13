@@ -7,6 +7,7 @@ from src.evaluations.monte_carlo import MultiLabelEvaluator as Evaluator
 from src.utils.filename_manager import FilenameManager
 from src.utils.results_writer import MetricsTracker
 from src.utils.losses import BNN_BCEWithLogitsLoss, BNN_CrossEntropyLoss
+from tqdm import tqdm
 
 class Trainer:
     def __init__(self, model, dataloader, config):
@@ -69,7 +70,7 @@ class Trainer:
 
         running_loss = 0.0
 
-        for batch, (images, y)  in enumerate(self.dataloader):
+        for batch, (images, y)  in enumerate(tqdm(self.dataloader, desc="Processing Batches")):
             images, y = images.to(self.device), y.to(self.device)
             if epoch == 1 and batch == 0:
                 print(f'{images.shape}, {y.shape}')
@@ -102,7 +103,7 @@ class Trainer:
 
         running_loss = 0.0
         with torch.no_grad():
-            for batch, (images, y)  in enumerate(val_loader):
+            for batch, (images, y)  in enumerate(tqdm(val_loader, desc="Processing Batches")):
                 images, y = images.to(self.device), y.to(self.device)
                 if batch == 0:
                     print(f'{images.shape}, {y.shape}')

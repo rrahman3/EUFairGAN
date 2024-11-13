@@ -4,6 +4,11 @@ from .utkface_loader import UTKFaceDataset
 from .chestmnist_dataset import train_loader, train_loader_at_eval, test_loader
 from .medical_dataset import NIHChestXrayDataset
 from .chexpert_dataset import CheXpertDataset
+import torch
+
+def collate_fn(batch):
+    batch = [item for item in batch if item[0] is not None]
+    return torch.utils.data.dataloader.default_collate(batch)
 
 def dataloader_factory(dataset_name, split, config, group=None): #group nust be 'male/female, black/white
     if dataset_name == "UTKFace":
@@ -99,7 +104,8 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
         dataset,
         batch_size=config[split]['batch_size'],
         shuffle=config[split]['shuffle'],
-        num_workers=config[split]['num_workers']
+        num_workers=config[split]['num_workers'],
+        collate_fn=collate_fn
     )
     print(f"Total samples in this dataloader: {len(dataloader.dataset)}")
     return dataloader

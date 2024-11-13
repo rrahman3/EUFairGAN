@@ -136,10 +136,10 @@ class MultiLabelEvaluator:
 
         # Get predictions
 
-        self.y_true = torch.cat((self.y_true, torch.tensor(batch_y_true, device=self.y_true.device)), 0)
-        self.y_score = torch.cat((self.y_score, torch.tensor(batch_y_pred, device=self.y_score.device)), 0)
+        self.y_true = torch.cat((self.y_true, batch_y_true.clone().detach()), 0)
+        self.y_score = torch.cat((self.y_score, batch_y_pred.clone().detach()), 0)
 
-        self.y_au_score = torch.cat((self.y_au_score, torch.tensor(batch_y_variance, device=self.y_au_score.device)), 0)
+        self.y_au_score = torch.cat((self.y_au_score, batch_y_variance.clone().detach()), 0)
 
 
     def apply_threshold(self, y_pred):
