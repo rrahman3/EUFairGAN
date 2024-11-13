@@ -3,6 +3,7 @@ from .celeba_loader import CelebADataset
 from .utkface_loader import UTKFaceDataset
 from .chestmnist_dataset import train_loader, train_loader_at_eval, test_loader
 from .medical_dataset import NIHChestXrayDataset
+from .chexpert_dataset import CheXpertDataset
 
 def dataloader_factory(dataset_name, split, config, group=None): #group nust be 'male/female, black/white
     if dataset_name == "UTKFace":
@@ -33,6 +34,26 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
             if groups[0] == "male" or groups[0] =="female":
                 dataset = dataset.filter_by_gender(groups[group])
     
+    elif dataset_name == "CheXpert":
+        dataset = CheXpertDataset(
+            metadata_file=config[split]['metadata_file'],
+            image_dir=config[split]['img_dir'],
+            image_dim=eval(config[split]['img_dim']),
+            frac=config[split]['frac']
+        )
+        if split == 'test':
+            groups = config[split]['groups']
+            if groups[0] == "male" or groups[0] =="female":
+                dataset = dataset.filter_by_gender(groups[group])
+            elif groups[0] == 'age':
+                age_threshold = int(groups[1])
+                if group == 0:
+                    dataset = dataset.filter_by_NIH_age(age_threshold=age_threshold, below_threshold=True)
+                elif group == 1:
+                    dataset = dataset.filter_by_NIH_age(age_threshold=age_threshold, below_threshold=False)
+                else:
+                    raise ValueError("group is not 0 or 1")
+                
     elif dataset_name == "NIHChestXray":
         isTest = True if split == 'test' else False
         dataset = NIHChestXrayDataset(

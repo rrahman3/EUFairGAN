@@ -1,4 +1,30 @@
 datasets:
+  CheXpert:
+    train:
+      metadata_file: "data/CheXpert-v1.0/train.csv"
+      img_dir: "data/"
+      frac: 1
+      batch_size: 32
+      img_dim: (224, 224)
+      shuffle: True
+      num_workers: 4  # Number of subprocesses for data loading
+    test:
+      metadata_file: "data/CheXpert-v1.0/valid.csv"
+      img_dir: "data/"
+      frac: 1
+      batch_size: 32
+      img_dim: (224, 224)
+      shuffle: False
+      num_workers: 4  # Number of subprocesses for data loading
+    val:
+      metadata_file: "data/CheXpert-v1.0/valid.csv"
+      img_dir: "data/"
+      frac: 1
+      batch_size: 32
+      img_dim: (224, 224)
+      shuffle: False
+      num_workers: 4  # Number of subprocesses for data loading
+
   ChestMNIST:
     train:
       metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv"
