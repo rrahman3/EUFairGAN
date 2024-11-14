@@ -141,9 +141,9 @@ class MultiLabelEvaluator:
 
         
         print(f"--------------------------Confusion matrix------------------------------:")
-        for i in range(self.y_true.shape[1]):
-            y_true_label = self.y_true[:, i]
-            y_pred_label = self.y_pred[:, i]
+        for i in range(y_true.shape[1]):
+            y_true_label = y_true[:, i]
+            y_pred_label = y_pred[:, i]
             y_pred_label = (y_pred_label >= 0.5).astype('float')
             
             cm = confusion_matrix(y_true_label, y_pred_label)
