@@ -133,11 +133,21 @@ class MultiLabelEvaluator:
         
         # AUC-ROC (per label, then averaged)
         auc = 0
-        for i in range(y_true.shape[1]):
-            label_auc = roc_auc_score(y_true[:, i], y_pred[:, i])
-            auc += label_auc
+        # for i in range(y_true.shape[1]):
+        #     label_auc = roc_auc_score(y_true[:, i], y_pred[:, i])
+        #     auc += label_auc
         auc_roc = auc / y_true.shape[1]
         # auc_roc = roc_auc_score(y_true, y_pred, average='macro')
+
+        
+        print(f"--------------------------Confusion matrix------------------------------:")
+        for i in range(self.y_true.shape[1]):
+            y_true_label = self.y_true[:, i]
+            y_pred_label = self.y_pred[:, i]
+            y_pred_label = (y_pred_label >= 0.5).astype('float')
+            
+            cm = confusion_matrix(y_true_label, y_pred_label)
+            print(f"Confusion matrix for label {i}: \n{cm}")
         
         # Return all metrics as a dictionary
         return {
