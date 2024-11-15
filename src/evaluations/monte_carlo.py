@@ -146,7 +146,7 @@ class MultiLabelEvaluator:
         """
         Apply threshold to the predicted probabilities to convert to binary labels.
         """
-        return (y_pred >= self.threshold).astype(int)
+        return (y_pred >= self.threshold).int()
 
     def compute_epoch_metrics(self, epoch_y_pred=None, epoch_y_true=None, epoch_y_au_score=None):
         """
@@ -154,10 +154,18 @@ class MultiLabelEvaluator:
         """
         if epoch_y_pred is None:
             self.y_score = self.y_score.detach().cpu().numpy()
+        else:
+            self.y_score = epoch_y_pred
         if epoch_y_true is None:
             self.y_true = self.y_true.detach().cpu().numpy()
+        else:
+            self.t_true = epoch_y_true
         if epoch_y_au_score is None:
             self.y_au_score = self.y_au_score.detach().cpu().numpy()
+        else:
+            self.y_au_score = epoch_y_au_score
+        
+
 
         # Apply threshold to convert probabilities to binary labels
         y_pred_bin = self.apply_threshold(self.y_score)
