@@ -159,7 +159,7 @@ class MultiLabelEvaluator:
         if epoch_y_true is None:
             self.y_true = self.y_true.detach().cpu().numpy()
         else:
-            self.t_true = epoch_y_true
+            self.y_true = epoch_y_true
         if epoch_y_au_score is None:
             self.y_au_score = self.y_au_score.detach().cpu().numpy()
         else:
