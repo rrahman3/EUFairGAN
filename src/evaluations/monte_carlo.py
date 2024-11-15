@@ -103,7 +103,7 @@ class MonteCarloPrediction:
             aleatoric_uncertainty = np.mean(y_au_score) #(batch, 1)
             epistemic_uncertainty = np.mean(epistemic_uncertainty)
             print(f'"Aleatoric Uncertainty":{aleatoric_uncertainty}\n"Epistemic Uncertainty":{epistemic_uncertainty}')
-            result = self.evaluation_metrics.compute_epoch_metrics(y_pred=y_score, y_true=y_true)
+            result = self.evaluation_metrics.compute_epoch_metrics(epoch_y_pred=y_score, epoch_y_true=y_true)
             print(result)
 
     def predictive_entropy(self, prob):
@@ -185,10 +185,15 @@ class MultiLabelEvaluator:
         
         # AUC-ROC (per label, then averaged)
         auc = 0
+        valid_labels = 0
         for i in range(self.y_true.shape[1]):
-            label_auc = roc_auc_score(self.y_true[:, i], self.y_score[:, i])
-            auc += label_auc
-        self.auc_roc = auc / self.y_true.shape[1]
+            if len(np.unique(self.y_true[:, i])) > 1:
+                label_auc = roc_auc_score(self.y_true[:, i], self.y_score[:, i])
+                auc += label_auc
+                valid_labels += 1
+            else:
+                print(f"Skipping label {i}: only one class present.")
+        self.auc_roc = auc / valid_labels if valid_labels > 0 else 0.0
         # auc_roc = roc_auc_score(y_true, y_pred, average='macro')
 
         print(f"--------------------------Confusion matrix------------------------------:")

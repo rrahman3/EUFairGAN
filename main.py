@@ -55,9 +55,9 @@ def main(args):
         print(f'task: {args.task}')
         from src.pretrained.MedViT import BNN_MedViT_Training
         print("Age Testing")
-        # print('Male Testing')
+        print('Below 65 Testing')
         BNN_MedViT_Training.test(model_pth=model_pth, sensitive_group='male')
-        print('Female Testing')
+        print('Above 65 Testing')
         BNN_MedViT_Training.test(model_pth=model_pth, sensitive_group='female')
 
     else:
