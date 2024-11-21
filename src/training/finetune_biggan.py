@@ -79,9 +79,9 @@ def finetune_biggan(dataloader):
             optimizer_D.zero_grad()
 
             # Generate fake images
-            noise = truncated_noise_sample(truncation=truncation, batch_size=batch_size)
+            noise_vector = truncated_noise_sample(truncation=truncation, batch_size=batch_size)
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
-            fake_images = biggan_model(noise=noise, class_labels=labels, truncation=0.5)
+            fake_images = biggan_model(noise_vector, labels, truncation)
 
             # Discriminator predictions
             real_preds = discriminator(real_images, labels)
