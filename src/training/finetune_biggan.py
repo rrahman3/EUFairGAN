@@ -85,8 +85,8 @@ def finetune_biggan(dataloader):
             fake_images = biggan_model(noise_vector, labels, truncation)
 
             # Discriminator predictions
-            real_preds = discriminator(real_images, labels)
-            fake_preds = discriminator(fake_images.detach(), labels)
+            real_preds = discriminator(real_images, labels.long())
+            fake_preds = discriminator(fake_images.detach(), labels.long())
 
             # Discriminator loss
             real_loss = criterion(real_preds, torch.ones_like(real_preds))  # Real images as 1
