@@ -113,6 +113,9 @@ def main(args):
             print('Female test')
             female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
             female_monte_carlo.asfsdgd()
+        elif task_name == 'fine_tune_biggan':
+            from src.training.finetune_biggan import finetune_biggan
+            finetune_biggan(train_loader)
 
     
 
@@ -122,7 +125,8 @@ if __name__ == "__main__":
     parser.add_argument('--model', default='nihccchest_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--dataset', default='CheXpert', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
     # parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--task', default='check_medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    # parser.add_argument('--task', default='check_medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--task', default='fine_tune_biggan',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--task_config', default='medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
 
     args = parser.parse_args()
