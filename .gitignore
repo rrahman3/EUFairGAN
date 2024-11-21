@@ -9,5 +9,3 @@ EUFairGAN.code-workspace
 
 # Ignore Python cache and virtual environments
 **/__pycache__/
-
-src/pretrained/BigGAN-PyTorch/
