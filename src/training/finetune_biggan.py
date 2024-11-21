@@ -67,8 +67,11 @@ criterion = BCEWithLogitsLoss()
 # Training loop
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def finetune_biggan(dataloader):
+    truncation = 0.6
+    batch_size = 1
     for epoch in range(num_epochs):
         for images, labels in dataloader:
+            batch_size = images.shape[0]
             real_images = images.to(device)
             labels = labels.to(device)
 
@@ -76,7 +79,8 @@ def finetune_biggan(dataloader):
             optimizer_D.zero_grad()
 
             # Generate fake images
-            noise = torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
+            noise = truncated_noise_sample(truncation=truncation, batch_size=batch_size)
+            # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
             fake_images = biggan_model(noise=noise, class_labels=labels, truncation=0.5)
 
             # Discriminator predictions
