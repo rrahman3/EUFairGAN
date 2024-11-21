@@ -36,18 +36,19 @@ class Discriminator(nn.Module):
 
     def forward(self, images, labels):
         # Extract image features
-        features = self.conv_layers(images)
-        features = features.view(features.size(0), -1)
+        features = self.conv_layers(images)  # Shape: [batch_size, 512, image_size//16, image_size//16]
+        features = features.view(features.size(0), -1)  # Flatten: [batch_size, 512 * (image_size // 16)^2]
 
         # Embed labels
-        label_embed = self.class_embedding(labels)
-        label_embed = self.fc_class_embed(label_embed)
+        labels = labels.long()  # Ensure labels are integers
+        label_embed = self.class_embedding(labels)  # Shape: [batch_size, embed_dim]
+        label_embed = self.fc_class_embed(label_embed)  # Shape: [batch_size, 512 * (image_size // 16)^2]
 
         # Combine features and label embeddings
-        combined = features + label_embed
+        combined = features + label_embed  # Element-wise addition
 
         # Output real/fake prediction
-        output = self.fc_real_fake(combined)
+        output = self.fc_real_fake(combined)  # Shape: [batch_size, 1]
         return output
 
 from torch.optim import Adam
