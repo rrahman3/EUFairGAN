@@ -69,7 +69,7 @@ criterion = BCEWithLogitsLoss()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def finetune_biggan(dataloader):
     truncation = 0.6
-    batch_size = 1
+    batch_size = 32
     for epoch in range(num_epochs):
         for images, labels in dataloader:
             batch_size = images.shape[0]
