@@ -72,6 +72,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def finetune_biggan(dataloader):
     truncation = 0.6
     batch_size = 32
+    kkk = 0
     for epoch in range(num_epochs):
         for images, labels in dataloader:
             batch_size = images.shape[0]
@@ -110,5 +111,24 @@ def finetune_biggan(dataloader):
 
             g_loss.backward()
             optimizer_G.step()
+            save_image_grid(fake_images, save_path=f"outputs/images/generated_image_grid_{kkk}.png", grid_size=(8, 4))
+            kkk += 1
+            if kkk == 10:
+                kkk = 0
 
         print(f"Epoch {epoch+1}/{num_epochs}, D Loss: {d_loss.item()}, G Loss: {g_loss.item()}")
+
+
+from PIL import Image
+import torch
+import torchvision.transforms as transforms
+import torchvision.utils as vutils
+import os
+def save_image_grid(fake_images, save_path="generated_image_grid.png", grid_size=(8, 4)):
+    fake_images = fake_images.detach().cpu()  # Make sure the tensor is on CPU
+
+    grid = vutils.make_grid(fake_images, nrow=grid_size[0], padding=2, normalize=True, range=(0, 1))
+    
+    grid_image = transforms.ToPILImage()(grid)
+    
+    grid_image.save(save_path)
