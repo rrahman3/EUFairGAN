@@ -43,9 +43,10 @@ class Discriminator(nn.Module):
         labels = labels.long()  # Ensure labels are integers
         label_embed = self.class_embedding(labels)  # Shape: [batch_size, embed_dim]
         label_embed = self.fc_class_embed(label_embed)  # Shape: [batch_size, 512 * (image_size // 16)^2]
-
+        print(features.shape, label_embed.shape)
         # Combine features and label embeddings
-        combined = features + label_embed  # Element-wise addition
+        combined = features 
+        # + label_embed  # Element-wise addition
 
         # Output real/fake prediction
         output = self.fc_real_fake(combined)  # Shape: [batch_size, 1]
@@ -54,7 +55,7 @@ class Discriminator(nn.Module):
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 
-discriminator = Discriminator(image_size=224)
+discriminator = Discriminator(image_size=128)
 biggan_model = BigGAN.from_pretrained('biggan-deep-128')
 biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
 biggan_model.config.num_classes = 14
@@ -80,7 +81,7 @@ def finetune_biggan(dataloader):
             optimizer_D.zero_grad()
 
             # Generate fake images
-            noise_vector = truncated_noise_sample(truncation=truncation, batch_size=batch_size)
+            noise_vector = truncated_noise_sample(truncation=truncation, dim_z=224, batch_size=batch_size)
             noise_vector = torch.from_numpy(noise_vector).float()
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
             fake_images = biggan_model(noise_vector, labels, truncation)

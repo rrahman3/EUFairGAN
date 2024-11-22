@@ -81,10 +81,10 @@ def main(args):
         male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
         female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
 
-        # model = model_factory(model_name=model_name, models_config=models_config)
-        # print(model)
+        model = model_factory(model_name=model_name, models_config=models_config)
+        print(model)
 
-        # N_MonteCarloSimulation = config['N_MonteCarloSimulation']
+        N_MonteCarloSimulation = config['N_MonteCarloSimulation']
         
         if task_name == 'train_bnn':
 
