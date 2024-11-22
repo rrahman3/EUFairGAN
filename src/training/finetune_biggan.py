@@ -40,10 +40,11 @@ class Discriminator(nn.Module):
         features = features.view(features.size(0), -1)  # Flatten: [batch_size, 512 * (image_size // 16)^2]
 
         # Embed labels
-        labels = labels.long()  # Ensure labels are integers
-        label_embed = self.class_embedding(labels)  # Shape: [batch_size, embed_dim]
-        label_embed = self.fc_class_embed(label_embed)  # Shape: [batch_size, 512 * (image_size // 16)^2]
-        print(features.shape, label_embed.shape)
+        # labels = labels.long()  # Ensure labels are integers
+        # label_embed = self.class_embedding(labels)  # Shape: [batch_size, embed_dim]
+        # label_embed = self.fc_class_embed(label_embed)  # Shape: [batch_size, 512 * (image_size // 16)^2]
+        print(features.shape)
+            #   , label_embed.shape)
         # Combine features and label embeddings
         combined = features 
         # + label_embed  # Element-wise addition
@@ -81,7 +82,7 @@ def finetune_biggan(dataloader):
             optimizer_D.zero_grad()
 
             # Generate fake images
-            noise_vector = truncated_noise_sample(truncation=truncation, dim_z=224, batch_size=batch_size)
+            noise_vector = truncated_noise_sample(truncation=truncation, dim_z=128, batch_size=batch_size)
             noise_vector = torch.from_numpy(noise_vector).float()
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
             fake_images = biggan_model(noise_vector, labels, truncation)
