@@ -123,7 +123,8 @@ if __name__ == "__main__":
     # Argument parsing
     parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
     parser.add_argument('--model', default='nihccchest_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
-    parser.add_argument('--dataset', default='CheXpert', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    parser.add_argument('--dataset', default='NIHChestXray', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    # parser.add_argument('--dataset', default='CheXpert', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
     # parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     # parser.add_argument('--task', default='check_medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--task', default='fine_tune_biggan',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
@@ -133,6 +134,8 @@ if __name__ == "__main__":
     print(args)
 
     main(args)
+    from src.pretrained.BigGAN_PyTorch import BigGANdeep
+    # from BigGAN
 
 
 

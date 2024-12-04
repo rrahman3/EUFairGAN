@@ -95,6 +95,7 @@ def GAN_training_function(G, D, GD, z_, y_, ema, state_dict, config):
     requested), and prepares sample sheets: one consisting of samples given
     a fixed noise seed (to show how the model evolves throughout training),
     a set of full conditional sample sheets, and a set of interp sheets. '''
+    
 def save_and_sample(G, D, G_ema, z_, y_, fixed_z, fixed_y, 
                     state_dict, config, experiment_name):
   utils.save_weights(G, D, state_dict, config['weights_root'],

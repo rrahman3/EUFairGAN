@@ -56,7 +56,11 @@ class Discriminator(nn.Module):
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 
-discriminator = Discriminator(image_size=128)
+# discriminator = Discriminator(image_size=128)
+
+from src.pretrained.BigGAN_PyTorch.BigGANdeep import Discriminator
+discriminator = Discriminator(n_classes=14)
+
 biggan_model = BigGAN.from_pretrained('biggan-deep-128')
 biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
 biggan_model.config.num_classes = 14
@@ -69,6 +73,7 @@ optimizer_D = Adam(discriminator.parameters(), lr=1e-4)
 criterion = BCEWithLogitsLoss()
 # Training loop
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 def finetune_biggan(dataloader):
     truncation = 0.6
     batch_size = 32
@@ -78,6 +83,8 @@ def finetune_biggan(dataloader):
             batch_size = images.shape[0]
             real_images = images.to(device)
             labels = labels.to(device)
+            labels = labels.unsqueeze(-1)
+            print(images.shape, labels.shape)
 
             # --- Update Discriminator ---
             optimizer_D.zero_grad()
@@ -127,7 +134,7 @@ import os
 def save_image_grid(fake_images, save_path="generated_image_grid.png", grid_size=(8, 4)):
     fake_images = fake_images.detach().cpu()  # Make sure the tensor is on CPU
 
-    grid = vutils.make_grid(fake_images, nrow=grid_size[0], padding=2, normalize=True, range=(0, 1))
+    grid = vutils.make_grid(fake_images, nrow=grid_size[0], padding=2, normalize=True)
     
     grid_image = transforms.ToPILImage()(grid)
     
