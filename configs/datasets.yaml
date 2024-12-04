@@ -5,14 +5,14 @@ datasets:
       img_dir: "data/"
       frac: .5
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
       metadata_file: "data/CheXpert-v1.0/valid.csv"
       img_dir: "data/"
       frac: 1.00
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       batch_size: 32
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
@@ -22,7 +22,7 @@ datasets:
       img_dir: "data/"
       frac: 1
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
 
@@ -32,7 +32,7 @@ datasets:
       img_dir: "data/nihcc_chest_xray/images/"
       frac: 1
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
@@ -40,7 +40,7 @@ datasets:
       img_dir: "data/nihcc_chest_xray/images/"
       frac: 1
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
     val:
@@ -48,7 +48,7 @@ datasets:
       img_dir: "data/nihcc_chest_xray/images/"
       frac: 1
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
       
@@ -58,7 +58,7 @@ datasets:
       img_dir: "data/nihcc_chest_xray/xray_images/"
       frac: .5
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
@@ -66,14 +66,14 @@ datasets:
       img_dir: "data/nihcc_chest_xray/xray_images/"
       frac: 1.00
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
     test:
       metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_testing_samples.csv"
       img_dir: "data/nihcc_chest_xray/xray_images/"
       frac: 1.00
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       batch_size: 32
       shuffle: False
       num_workers: 4  # Number of subprocesses for data loading
