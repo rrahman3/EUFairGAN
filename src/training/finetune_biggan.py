@@ -94,18 +94,18 @@ def finetune_biggan(dataloader):
 
             # Generate fake images
             noise_vector = truncated_noise_sample(truncation=truncation, dim_z=128, batch_size=batch_size)
-            noise_vector = torch.from_numpy(noise_vector).float()
-            noise_vector = noise_vector.to(device)
+            noise_vector = torch.from_numpy(noise_vector).float().to(device) 
+
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
-            fake_images = biggan_model(noise_vector, labels, truncation).to(device)
+            fake_images = biggan_model(noise_vector, labels, truncation)
 
             # Discriminator predictions
             real_preds = discriminator(real_images, labels.long())
             fake_preds = discriminator(fake_images.detach(), labels.long())
 
             # Discriminator loss
-            real_loss = criterion(real_preds, torch.ones_like(real_preds))  # Real images as 1
-            fake_loss = criterion(fake_preds, torch.zeros_like(fake_preds))  # Fake images as 0
+            real_loss = criterion(real_preds, torch.ones_like(real_preds).to(device))  # Use ones_like on the same device Real images as 1
+            fake_loss = criterion(fake_preds, torch.zeros_like(fake_preds).to(device))  # Use zeros_like on the same device, Fake iamge as 0
             d_loss = real_loss + fake_loss
 
             d_loss.backward()
