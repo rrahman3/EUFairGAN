@@ -86,7 +86,7 @@ def finetune_biggan(dataloader):
             batch_size = images.shape[0]
             real_images = images.to(device)
             labels = labels.to(device)
-            labels = labels.unsqueeze(-1)
+            # labels = labels.unsqueeze(-1)
             print(images.shape, labels.shape)
 
             # --- Update Discriminator ---
@@ -100,8 +100,8 @@ def finetune_biggan(dataloader):
             fake_images = biggan_model(noise_vector, labels.to(device), truncation)
 
             # Discriminator predictions
-            real_preds = discriminator(real_images, labels.long())
-            fake_preds = discriminator(fake_images.detach(), labels.long())
+            real_preds = discriminator(real_images, labels.unsqueeze(-1).long())
+            fake_preds = discriminator(fake_images.detach(), labels.unsqueeze(-1).long())
 
             # Discriminator loss
             real_loss = criterion(real_preds, torch.ones_like(real_preds).to(device))  # Use ones_like on the same device Real images as 1
