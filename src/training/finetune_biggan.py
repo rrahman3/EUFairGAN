@@ -115,7 +115,7 @@ def finetune_biggan(dataloader):
             optimizer_G.zero_grad()
 
             # Generate new fake images
-            fake_preds = discriminator(fake_images, labels)
+            fake_preds = discriminator(fake_images, labels.unsqueeze(-1).long())
 
             # Generator loss (tries to fool the discriminator)
             g_loss = criterion(fake_preds, torch.ones_like(fake_preds))  # Fake images as 1
