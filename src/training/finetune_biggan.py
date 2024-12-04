@@ -94,6 +94,7 @@ def finetune_biggan(dataloader):
             # Generate fake images
             noise_vector = truncated_noise_sample(truncation=truncation, dim_z=128, batch_size=batch_size)
             noise_vector = torch.from_numpy(noise_vector).float()
+            noise_vector = noise_vector.to(device)
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
             fake_images = biggan_model(noise_vector, labels, truncation)
 
