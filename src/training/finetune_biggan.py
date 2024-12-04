@@ -60,7 +60,8 @@ from torch.nn import BCEWithLogitsLoss
 # discriminator = Discriminator(image_size=128)
 
 from src.pretrained.BigGAN_PyTorch.BigGANdeep import Discriminator
-discriminator = Discriminator(n_classes=14).to(device)
+discriminator = Discriminator(n_classes=14)
+discriminator = discriminator.to(device)
 
 biggan_model = BigGAN.from_pretrained('biggan-deep-128')
 biggan_model = biggan_model.to(device)
@@ -96,7 +97,7 @@ def finetune_biggan(dataloader):
             noise_vector = torch.from_numpy(noise_vector).float()
             noise_vector = noise_vector.to(device)
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
-            fake_images = biggan_model(noise_vector, labels, truncation)
+            fake_images = biggan_model(noise_vector, labels, truncation).to(device)
 
             # Discriminator predictions
             real_preds = discriminator(real_images, labels.long())
@@ -123,7 +124,7 @@ def finetune_biggan(dataloader):
             optimizer_G.step()
             save_image_grid(fake_images, save_path=f"outputs/images/generated_image_grid_{kkk}.png", grid_size=(8, 4))
             kkk += 1
-            if kkk == 10:
+            if kkk == 100:
                 kkk = 0
 
         print(f"Epoch {epoch+1}/{num_epochs}, D Loss: {d_loss.item()}, G Loss: {g_loss.item()}")
