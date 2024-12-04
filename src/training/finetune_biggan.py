@@ -97,7 +97,7 @@ def finetune_biggan(dataloader):
             noise_vector = torch.from_numpy(noise_vector).float().to(device) 
 
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
-            fake_images = biggan_model(noise_vector, labels.to(device), truncation)
+            fake_images = biggan_model(noise_vector, labels.to(device), truncation.to(device))
 
             # Discriminator predictions
             real_preds = discriminator(real_images, labels.unsqueeze(-1).long())
