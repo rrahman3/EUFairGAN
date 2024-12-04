@@ -53,15 +53,17 @@ class Discriminator(nn.Module):
         output = self.fc_real_fake(combined)  # Shape: [batch_size, 1]
         return output
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 
 # discriminator = Discriminator(image_size=128)
 
 from src.pretrained.BigGAN_PyTorch.BigGANdeep import Discriminator
-discriminator = Discriminator(n_classes=14)
+discriminator = Discriminator(n_classes=14).to(device)
 
 biggan_model = BigGAN.from_pretrained('biggan-deep-128')
+biggan_model = biggan_model.to(device)
 biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
 biggan_model.config.num_classes = 14
 
@@ -72,7 +74,7 @@ optimizer_D = Adam(discriminator.parameters(), lr=1e-4)
 
 criterion = BCEWithLogitsLoss()
 # Training loop
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def finetune_biggan(dataloader):
     truncation = 0.6
