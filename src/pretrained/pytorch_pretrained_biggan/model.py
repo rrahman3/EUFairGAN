@@ -288,7 +288,9 @@ class BigGAN(nn.Module):
 
     def forward(self, z, class_label, truncation):
         assert 0 < truncation <= 1
-
+        print('inside biggan')
+        print(z.device)        
+        print(class_label.device)
         embed = self.embeddings(class_label)
         cond_vector = torch.cat((z, embed), dim=1)
 
