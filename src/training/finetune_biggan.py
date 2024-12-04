@@ -65,6 +65,9 @@ discriminator = discriminator.to(device)
 
 biggan_model = BigGAN.from_pretrained('biggan-deep-128')
 biggan_model = biggan_model.to(device)
+for param in biggan_model.parameters():
+    print(param.device)
+print("BigGAN model is on device:", next(biggan_model.parameters()).device)
 biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
 biggan_model.config.num_classes = 14
 
@@ -97,7 +100,7 @@ def finetune_biggan(dataloader):
             noise_vector = torch.from_numpy(noise_vector).float().to(device) 
 
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
-            fake_images = biggan_model(noise_vector, labels.to(device), truncation.to(device))
+            fake_images = biggan_model(noise_vector, labels.to(device), truncation)
 
             # Discriminator predictions
             real_preds = discriminator(real_images, labels.unsqueeze(-1).long())

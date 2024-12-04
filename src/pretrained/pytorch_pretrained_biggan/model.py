@@ -276,14 +276,16 @@ class BigGAN(nn.Module):
 
         # Instantiate model.
         model = cls(config, *inputs, **kwargs)
-        state_dict = torch.load(resolved_model_file, map_location='cpu' if not torch.cuda.is_available() else None)
+        state_dict = torch.load(resolved_model_file, map_location='cpu')
+        # if not torch.cuda.is_available() else None)
         model.load_state_dict(state_dict, strict=False)
+        print(next(model.parameters()).device)
         return model
 
     def __init__(self, config):
         super(BigGAN, self).__init__()
         self.config = config
-        self.embeddings = nn.Linear(config.num_classes, config.z_dim, bias=False)
+        self.embeddings = nn.Linear(config.num_classes, config.z_dim, bias=True)
         self.generator = Generator(config)
 
     def forward(self, z, class_label, truncation):
@@ -293,6 +295,8 @@ class BigGAN(nn.Module):
         print(class_label.device)
         embed = self.embeddings(class_label)
         cond_vector = torch.cat((z, embed), dim=1)
+        print(cond_vector.shape)
+        
 
         z = self.generator(cond_vector, truncation)
         return z
