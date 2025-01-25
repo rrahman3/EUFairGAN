@@ -63,13 +63,15 @@ from src.pretrained.BigGAN_PyTorch.BigGANdeep import Discriminator
 discriminator = Discriminator(n_classes=14)
 discriminator = discriminator.to(device)
 
-biggan_model = BigGAN.from_pretrained('biggan-deep-128')
+from src.pretrained.BigGAN_PyTorch.BigGANdeep import Generator
+biggan_model = Generator(n_classes=14)
+# biggan_model = BigGAN.from_pretrained('biggan-deep-128')
 biggan_model = biggan_model.to(device)
 for param in biggan_model.parameters():
     print(param.device)
 print("BigGAN model is on device:", next(biggan_model.parameters()).device)
-biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
-biggan_model.config.num_classes = 14
+# biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
+# biggan_model.config.num_classes = 14
 
 num_epochs = 100
 # Initialize optimizers for generator and discriminator
@@ -96,11 +98,11 @@ def finetune_biggan(dataloader):
             optimizer_D.zero_grad()
 
             # Generate fake images
-            noise_vector = truncated_noise_sample(truncation=truncation, dim_z=128, batch_size=batch_size)
+            noise_vector = truncated_noise_sample(truncation=truncation, dim_z=256, batch_size=batch_size)
             noise_vector = torch.from_numpy(noise_vector).float().to(device) 
 
             # torch.randn(images.size(0), biggan_model.config.latent_dim).to(device)
-            fake_images = biggan_model(noise_vector, labels.to(device), truncation)
+            fake_images = biggan_model(noise_vector, labels.unsqueeze(-1).long())
 
             # Discriminator predictions
             real_preds = discriminator(real_images, labels.unsqueeze(-1).long())

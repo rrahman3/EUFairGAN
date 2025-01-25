@@ -16,7 +16,7 @@ import datetime
 import json
 import pickle
 from argparse import ArgumentParser
-import animal_hash
+from . import animal_hash
 
 import torch
 import torch.nn as nn
@@ -25,7 +25,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-import datasets as dset
+from . import datasets as dset
 
 def prepare_parser():
   usage = 'Parser for all scripts.'

@@ -1,12 +1,12 @@
 import argparse
 import torch
-from src.dataloader.celeba_loader import CelebADataset
-from src.models.cnn_model import CNNModel
-from src.models.transformer_model import ViT, ViT2
-from src.pretrained.MedViT import MedViT
+# from src.dataloader.celeba_loader import CelebADataset
+# from src.models.cnn_model import CNNModel
+# from src.models.transformer_model import ViT, ViT2
+# from src.pretrained.MedViT import MedViT
 # from src.models.medical_transformer import MedViT
 # from src.training.trainer import Trainer
-from src.training.bnn_trainer import Trainer
+# from src.training.bnn_trainer import Trainer
 from src.evaluations.evaluator import Evaluator
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory

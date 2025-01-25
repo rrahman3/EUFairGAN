@@ -24,7 +24,9 @@ class ConvBNReLU(nn.Module):
             out_channels,
             kernel_size,
             stride,
-            groups=1):
+            groups=1
+        ):
+        
         super(ConvBNReLU, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride,
                               padding=1, groups=groups, bias=False)
@@ -41,8 +43,10 @@ class ConvBNReLU(nn.Module):
 def _make_divisible(v, divisor, min_value=None):
     if min_value is None:
         min_value = divisor
+
     new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
     # Make sure that round down does not go down by more than 10%.
+
     if new_v < 0.9 * v:
         new_v += divisor
     return new_v
@@ -52,17 +56,23 @@ class PatchEmbed(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride=1):
+                 stride=1
+        ):
+
         super(PatchEmbed, self).__init__()
+
         norm_layer = partial(nn.BatchNorm2d, eps=NORM_EPS)
+
         if stride == 2:
             self.avgpool = nn.AvgPool2d((2, 2), stride=2, ceil_mode=True, count_include_pad=False)
             self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=False)
             self.norm = norm_layer(out_channels)
+
         elif in_channels != out_channels:
             self.avgpool = nn.Identity()
             self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=False)
             self.norm = norm_layer(out_channels)
+
         else:
             self.avgpool = nn.Identity()
             self.conv = nn.Identity()
