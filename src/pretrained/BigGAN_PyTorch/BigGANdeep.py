@@ -201,7 +201,7 @@ class Generator(nn.Module):
 
       # If attention on this block, attach it to the end
       if self.arch['attention'][self.arch['resolution'][index]]:
-        print('Adding attention layer in G at resolution %d' % self.arch['resolution'][index])
+        # print('Adding attention layer in G at resolution %d' % self.arch['resolution'][index])
         self.blocks[-1] += [layers.Attention(self.arch['out_channels'][index], self.which_conv)]
 
     # Turn self.blocks into a ModuleList so that it's all properly registered.
@@ -268,9 +268,12 @@ class Generator(nn.Module):
       z = torch.cat([y, z], 1)      
       y = z
     # First linear layer
+    print(f"in forward z = {z.shape}, y = {y.shape}")
     h = self.linear(z)
     # Reshape
-    h = h.view(h.size(0), -1, self.bottom_width, self.bottom_width)    
+    print(h.shape) 
+    h = h.view(h.size(0), -1, self.bottom_width, self.bottom_width)   
+    print(h.shape) 
     # Loop over blocks
     for index, blocklist in enumerate(self.blocks):
       # Second inner loop in case block has multiple layers
@@ -425,7 +428,7 @@ class Discriminator(nn.Module):
                        for d_index in range(self.D_depth)]]
       # If attention on this block, attach it to the end
       if self.arch['attention'][self.arch['resolution'][index]]:
-        print('Adding attention layer in D at resolution %d' % self.arch['resolution'][index])
+        # print('Adding attention layer in D at resolution %d' % self.arch['resolution'][index])
         self.blocks[-1] += [layers.Attention(self.arch['out_channels'][index],
                                              self.which_conv)]
     # Turn self.blocks into a ModuleList so that it's all properly registered.
@@ -470,7 +473,7 @@ class Discriminator(nn.Module):
         else:
           print('Init style not recognized...')
         self.param_count += sum([p.data.nelement() for p in module.parameters()])
-    print('Param count for D''s initialized parameters: %d' % self.param_count)
+    # print('Param count for D''s initialized parameters: %d' % self.param_count)
 
   def forward(self, x, y=None):
     # Run input conv

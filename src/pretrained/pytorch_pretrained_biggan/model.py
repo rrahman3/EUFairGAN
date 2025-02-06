@@ -285,6 +285,7 @@ class BigGAN(nn.Module):
     def __init__(self, config):
         super(BigGAN, self).__init__()
         self.config = config
+        print(self.config)
         self.embeddings = nn.Linear(config.num_classes, config.z_dim, bias=True)
         self.generator = Generator(config)
 
@@ -293,8 +294,10 @@ class BigGAN(nn.Module):
         print('inside biggan')
         print(z.device)        
         print(class_label.device)
+        print(f'noise dim {z.shape}, class_dim {class_label.shape}')
         embed = self.embeddings(class_label)
         cond_vector = torch.cat((z, embed), dim=1)
+        print(f"cond_vector: {cond_vector.shape}")
         print(cond_vector.shape)
         
 

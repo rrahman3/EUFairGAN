@@ -22,15 +22,15 @@ class NIHChestXrayDataset(CustomDataset):
         print(len(self.metadata))
         self.model_input_image_dim = (128, 128)
         self.train_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((128, 128)),
             # transforms.Lambda(lambda image: image.convert('RGB')),
             torchvision.transforms.AugMix(),
             transforms.ToTensor(),
             transforms.Normalize(mean=[.5], std=[.5])
         ])
         self.test_transform = transforms.Compose([
-            transforms.Resize((112, 112)),
-            transforms.Resize((224, 224)),
+            transforms.Resize((64, 64)),
+            transforms.Resize((128, 128)),
             # transforms.Lambda(lambda image: image.convert('RGB')),
             transforms.ToTensor(),
             transforms.Normalize(mean=[.5], std=[.5])

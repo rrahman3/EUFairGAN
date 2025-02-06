@@ -54,8 +54,8 @@ datasets:
       
   NIHChestXray:
     train:
-      metadata_file: "data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv"
-      img_dir: "data/nihcc_chest_xray/xray_images/"
+      metadata_file: "../data/nihcc_chest_xray/nihcc_chest_xray_training_samples.csv"
+      img_dir: "../data/nihcc_chest_xray/xray_images/"
       frac: .5
       batch_size: 32
       img_dim: (128, 128)

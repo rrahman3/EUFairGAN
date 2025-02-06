@@ -37,11 +37,11 @@ class FilenameManager:
         filename = self.get_filename('models') + 'model_weights'
 
         if epoch is not None:
-            filename += f"_epoch{epoch}"
+            filename += f"_epoch_{epoch}"
         if batch_size is not None:
-            filename += f"_batch{batch_size}"
+            filename += f"_batch_{batch_size}"
         if learning_rate is not None:
-            filename += f"_lr{learning_rate}"
+            filename += f"_lr_{learning_rate}"
 
         filename += f"_{self.timestamp}.{extension}"
         return filename
