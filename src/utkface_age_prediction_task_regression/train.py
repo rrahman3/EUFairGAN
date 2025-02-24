@@ -470,7 +470,7 @@ class MonteCarloPredictionRegression:
         y_pred_all = np.concatenate(y_pred_all, axis=0)
         epistemic_all = np.concatenate(epistemic_all, axis=0)
         aleatoric_all = np.concatenate(aleatoric_all, axis=0)
-
+        print(f"Dimension of the testing set {y_true_all.shape}{y_pred_all.shape}{epistemic_all.shape}{aleatoric_all.shape}")
         # Compute evaluation metric: MAE.
         mae = mean_absolute_error(y_true_all, y_pred_all)
         print(f"MAE: {mae:.4f}")
@@ -547,6 +547,9 @@ if __name__ == "__main__":
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
     model = UTKFaceAgeModel(task='regression', drop_rate=0.5, hidden_layer=128)
+    model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
+    # task_config['bnn_model_location']
+    model.load_model(model_saved_location) 
     # model = model_factory(model_name=model_name, models_config=models_config)
     print(model)
 
@@ -569,7 +572,8 @@ if __name__ == "__main__":
         task_config = config[task_name][task_config_name]
         print(task_config)
 
-        model_saved_location = task_config['bnn_model_location']
+        model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_87_lr_0.005_20250224_121334.pth"
+        # task_config['bnn_model_location']
         model.load_model(model_saved_location)        
 
         print('Male test')
