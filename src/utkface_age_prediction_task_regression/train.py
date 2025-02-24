@@ -313,6 +313,13 @@ class Trainer:
 
             self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
             self.results_writer.save()
+            print('Male test')
+            male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+            male_monte_carlo.run_predictions()
+
+            print('Female test')
+            female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+            female_monte_carlo.run_predictions()
 
 
     def train_epoch(self, epoch):
@@ -384,7 +391,7 @@ from tqdm import tqdm
 from sklearn.metrics import mean_absolute_error
 
 class MonteCarloPredictionRegression:
-    def __init__(self, model, dataloader, N=10):
+    def __init__(self, model, dataloader, N=100):
         """
         Args:
             model: A heteroscedastic regression model that returns (predicted_mean, log_variance).
@@ -473,7 +480,7 @@ class MonteCarloPredictionRegression:
         avg_alea = np.mean(aleatoric_all)
         print(f"Average Epistemic Uncertainty: {avg_epi:.4f}")
         print(f"Average Aleatoric Uncertainty: {avg_alea:.4f}")
-        
+
         return mae, y_pred_all, avg_alea, avg_epi
 
         # return y_true_all, y_pred_all, aleatoric_all, epistemic_all
@@ -558,12 +565,12 @@ if __name__ == "__main__":
         # Train the model
         trainer.train(val_loader)
 
-    # elif task_name == 'test_bnn':
-    #     task_config = config[task_name][task_config_name]
-    #     print(task_config)
+    elif task_name == 'test_bnn':
+        task_config = config[task_name][task_config_name]
+        print(task_config)
 
-    #     model_saved_location = task_config['bnn_model_location']
-    #     model.load_model(model_saved_location)        
+        model_saved_location = task_config['bnn_model_location']
+        model.load_model(model_saved_location)        
 
         print('Male test')
         male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
