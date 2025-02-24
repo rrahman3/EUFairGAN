@@ -441,6 +441,7 @@ class MonteCarloPredictionRegression:
         # Activate dropout for MC sampling.
         for batch_data in tqdm(self.dataloader):
             images, y = batch_data
+            images = images.to(self.device)
             batch_size = images.shape[0]
             # Containers to store MC samples (shape: [batch, N, 1])
             y_pred_samples = np.empty((batch_size, self.N, 1))
@@ -481,7 +482,7 @@ class MonteCarloPredictionRegression:
         print(f"Average Epistemic Uncertainty: {avg_epi:.4f}")
         print(f"Average Aleatoric Uncertainty: {avg_alea:.4f}")
 
-        return mae, y_pred_all, avg_alea, avg_epi
+        return mae, avg_alea, avg_epi
 
         # return y_true_all, y_pred_all, aleatoric_all, epistemic_all
 
