@@ -449,9 +449,9 @@ class MonteCarloPredictionRegression:
 
             for i in range(self.N):
                 y_pred, y_var = self.get_prediction(images)
-                # y_pred and y_var are of shape (batch, 1, 1); squeeze the extra dimension.
-                y_pred_samples[:, i, :] = y_pred[:, 0, :]
-                y_var_samples[:, i, :] = y_var[:, 0, :]
+                # y_pred and y_var are of shape (batch, 1); squeeze the extra dimension.
+                y_pred_samples[:, i, :] = y_pred
+                y_var_samples[:, i, :] = y_var
 
             # Compute the Monte Carlo mean prediction.
             y_pred_mean = np.mean(y_pred_samples, axis=1)  # (batch, 1)
