@@ -43,7 +43,8 @@ class Trainer:
         if self.loss_function_config == "bnn_cross_entropy":
             return BNN_CrossEntropyLoss
         elif self.loss_function_config == "bnn_binary_cross_entropy":
-            return BNN_BCEWithLogitsLoss
+            print("BNN_CrossEntropyLoss")
+            return BNN_CrossEntropyLoss
         elif self.loss_function_config == "nn.CrossEntropyLoss":
             return nn.CrossEntropyLoss()
         else:
@@ -70,7 +71,7 @@ class Trainer:
 
         running_loss = 0.0
 
-        for batch, (images, y)  in enumerate(tqdm(self.dataloader, desc="Processing Batches")):
+        for batch, (images, _, y)  in enumerate(tqdm(self.dataloader, desc="Processing Training Batches")):
             images, y = images.to(self.device), y.to(self.device)
             if epoch == 1 and batch == 0:
                 print(f'{images.shape}, {y.shape}')
@@ -79,7 +80,7 @@ class Trainer:
             self.optimizer.zero_grad()
 
             # Compute prediction and loss
-            pred, var = self.model(images)
+            pred, var = self.model(images, _)
             loss = self.loss_function(pred, y, var)
             running_loss += loss.item()
 
@@ -103,13 +104,13 @@ class Trainer:
 
         running_loss = 0.0
         with torch.no_grad():
-            for batch, (images, y)  in enumerate(tqdm(val_loader, desc="Processing Batches")):
+            for batch, (images, _, y)  in enumerate(tqdm(val_loader, desc="Processing Validation Batches")):
                 images, y = images.to(self.device), y.to(self.device)
                 if batch == 0:
                     print(f'{images.shape}, {y.shape}')
 
                 # Compute prediction and loss
-                pred, var = self.model(images)
+                pred, var = self.model(images, _)
                 loss = self.loss_function(pred, y, var)
                 running_loss += loss.item()
 

@@ -7,7 +7,7 @@ from torchvision import transforms
 import numpy as np
     
 class UTKFaceDataset(Dataset):
-    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None):
+    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None, task=None):
         self.image_dir = image_dir
         self.metadata_file = metadata_file
         self.metadata = self._process_csv()
@@ -16,7 +16,7 @@ class UTKFaceDataset(Dataset):
         self.image_dim = image_dim
         # print(len(self.metadata))
         self.model_input_image_dim = (128, 128)
-
+        self.task = task
 
     def __len__(self):
         return len(self.metadata)
@@ -46,6 +46,8 @@ class UTKFaceDataset(Dataset):
                     }
             
             # return sample['lr_image'], sample['hr_image'], sample['gender'], sample['age_classification']
+            if self.task == 2:
+                return sample['lr_image'], sample['age_classification']
             return sample['lr_image'], sample['gender'], sample['age_classification']
         
         except KeyError as e:

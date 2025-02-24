@@ -28,7 +28,7 @@ check_medvit_test:
 check_bnn_medvit_test:
   model_pth: 'outputs/bnn_medvit_base_nihcccheset/medvit_mnist__base_wt74.pt'
 
-N_MonteCarloSimulation: 10
+N_MonteCarloSimulation: 100
 
 test_bnn:
 
@@ -56,9 +56,21 @@ test_bnn:
 
   utkface_gender:
     desc: 'Dataset: UTKFace, Model: CNNModel, Task: Age Prediction, Outclass: 3, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 14K'
-    bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20241010_200858/models/model_weights__epoch50_lr0.001_20241010_200858..pth'
+    # bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20241010_200858/models/model_weights__epoch50_lr0.001_20241010_200858..pth'
+    bnn_model_location: 'outputs/train_bnn_utkface_cnn_UTKFace_20250206_165921/models/model_weights_epoch_50_lr_0.005_20250206_165921.pth'
     dataset: 'UTKFace'
     model_class: 'CNNModel'
+    hyperparameters:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      optimizer: 'adam'
+
+  utkface_gender_resnet50:
+    desc: 'Dataset: UTKFace, Model: Resnet, Task: Smiling or Not, Outclass: 2, Optim: Adam, lr: 0.001, batch: 32, #train_samples: 144K'
+    bnn_model_location: 'outputs/train_bnn_resnet_50_utkface_UTKFace_20250206_194612/models/model_weights_epoch_100_lr_0.005_20250206_194612.pth'
+    dataset: 'UTKFace'
+    model_class: 'ResNet50'
     hyperparameters:
       learning_rate: 0.001
       epochs: 100

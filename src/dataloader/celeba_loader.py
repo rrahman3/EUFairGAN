@@ -8,7 +8,7 @@ from .custom_dataset import CustomDataset
 import numpy as np
     
 class CelebADataset(CustomDataset):
-    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None):
+    def __init__(self, image_dir, metadata_file, image_dim=(128, 128), frac=None, task=None):
 
         self.image_dir = image_dir
         self.metadata_file = metadata_file
@@ -18,6 +18,7 @@ class CelebADataset(CustomDataset):
         self.image_dim = image_dim
         print(len(self.metadata))
         self.model_input_image_dim = (128, 128)
+        self.task = task
 
     def __len__(self):
         return len(self.metadata)
@@ -35,7 +36,8 @@ class CelebADataset(CustomDataset):
                     'gender': gender, 
                     'y_label': y_label, 
                 }
-        
+        if self.task == 2:
+            return sample['lr_image'], sample['y_label']
         return sample['lr_image'], sample['gender'], sample['y_label']
     
     def _process_raw_image(self, img, image_dim):

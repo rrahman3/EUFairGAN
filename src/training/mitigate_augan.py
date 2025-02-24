@@ -41,6 +41,37 @@ class AdversarialLoss(nn.Module):
 
         return F.binary_cross_entropy_with_logits(y_pred, y_true)
 
+def ragan_discriminator_loss(D_real, D_fake):
+    D_real_rel = torch.sigmoid(D_real - D_fake.mean(dim=0, keepdim=True))
+    D_fake_rel = torch.sigmoid(D_fake - D_real.mean(dim=0, keepdim=True))
+    
+    loss_real = F.binary_cross_entropy(D_real_rel, torch.ones_like(D_real))
+    loss_fake = F.binary_cross_entropy(D_fake_rel, torch.zeros_like(D_fake))
+
+    return loss_real + loss_fake
+
+
+def discriminator_loss(D_real, D_fake):
+
+    loss_real = F.binary_cross_entropy(D_real, torch.ones_like(D_real))
+    loss_fake = F.binary_cross_entropy(D_fake, torch.zeros_like(D_fake))
+
+    return loss_real + loss_fake
+
+def ragan_generator_loss(D_real, D_fake):
+    """
+    Relativistic Average GAN (RaGAN) Generator Loss.
+    """
+    D_real_rel = torch.sigmoid(D_real - D_fake.mean(dim=0, keepdim=True))
+    D_fake_rel = torch.sigmoid(D_fake - D_real.mean(dim=0, keepdim=True))
+
+    loss_real = F.binary_cross_entropy(D_real_rel, torch.zeros_like(D_real))
+    loss_fake = F.binary_cross_entropy(D_fake_rel, torch.ones_like(D_fake))
+
+    return loss_real + loss_fake
+
+
+
 class L1Loss(nn.Module):
     def __init__(self):
         super(L1Loss, self).__init__()
@@ -119,6 +150,7 @@ def train_esrgan(cnn_model, generator, esrgan_discriminator, gender_discriminato
             # fake_hr_images = generator(lr_images).detach()
             fake_hr_images = generator.model(lr_images)
             debug_print(f"before: {fake_hr_images.shape}")
+
             real_labels = torch.ones(hr_images.size(0), 1).to(device)
             fake_labels = torch.zeros(hr_images.size(0), 1).to(device)
 
@@ -130,7 +162,8 @@ def train_esrgan(cnn_model, generator, esrgan_discriminator, gender_discriminato
             debug_print(f"d_loss_real {d_loss_real}")
             debug_print(f"d_loss_fake {d_loss_fake}")
 
-            d_loss = d_loss_real + d_loss_fake
+            # d_loss = d_loss_real + d_loss_fake
+            d_loss = ragan_discriminator_loss(d_real, d_fake)
             d_loss.backward()
             optimizer_d.step()
 
@@ -163,7 +196,8 @@ def train_esrgan(cnn_model, generator, esrgan_discriminator, gender_discriminato
             fake_hr_images = generator.model(lr_images)
             d_fake = esrgan_discriminator(fake_hr_images).to(device)
             valid_labels = torch.ones(hr_images.size(0), 1).to(device)
-            g_adversarial_loss = d_loss_fn(d_fake, valid_labels)
+            # g_adversarial_loss = d_loss_fn(d_fake, valid_labels)
+            g_adversarial_loss = ragan_generator_loss(d_real, d_fake)
             
             # GAN Gender Discriminator, decides fake vs real gender from the fake image
             # need to flip the gender labels
@@ -174,7 +208,9 @@ def train_esrgan(cnn_model, generator, esrgan_discriminator, gender_discriminato
             debug_print(f'gender labels vs toggled, {gender_labels}, {toggled_gender_labels}')
             debug_print(toggled_gender_labels.shape)
             d_gender_loss = gender_loss_fn(d_fake_gender, toggled_gender_labels)
+
             esrgan_loss = esrgan_loss_fn(fake_hr_images, hr_images)
+
             g_loss = esrgan_loss + celebAConfig.mitigation_adv_coefficient * g_adversarial_loss + celebAConfig.mitigation_mu_coefficient * d_gender_loss
 
             # g_loss = esrgan_loss_fn(fake_hr_images, hr_images) + 0.001 * g_adversarial_loss

@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 # from src.evaluations.evaluator import Evaluator
 from src.evaluations.monte_carlo import MultiLabelEvaluator as Evaluator
-from src.utils.losses import crossentropy_loss
+from src.utils.losses import BNN_CrossEntropyLoss
 from src.utils.filename_manager import FilenameManager
 from src.utils.results_writer import MetricsTracker
 
@@ -40,9 +40,11 @@ class Trainer:
 
     def _initialize_loss_function(self):
         if self.loss_function_config == "cross_entropy":
-            return crossentropy_loss
+            return BNN_CrossEntropyLoss
         elif self.loss_function_config == "nn.CrossEntropyLoss":
             return nn.CrossEntropyLoss()
+        elif self.loss_function_config =="bnn_binary_cross_entropy":
+            return BNN_CrossEntropyLoss
         else:
             raise ValueError(f"Unsupported loss function: {self.loss_function_config}")
 

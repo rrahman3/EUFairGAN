@@ -35,6 +35,12 @@ models:
       learning_rate: 0.001
       num_epochs: 100
 
+  resnet_50_utkface:
+    model_class: ResNet50
+    params:
+      num_classes: 3
+      learning_rate: 0.001
+      num_epochs: 100
 
   utkface_cnn:
     model_class: CNNModel

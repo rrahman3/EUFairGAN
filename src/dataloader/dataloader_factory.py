@@ -16,7 +16,8 @@ def dataloader_factory(dataset_name, split, config, group=None): #group nust be 
             metadata_file=config[split]['metadata_file'],
             image_dir=config[split]['img_dir'],
             image_dim=eval(config[split]['img_dim']),
-            frac=config[split]['frac']
+            frac=config[split]['frac'],
+            task = 2
         )
         if split == 'test':
             print(config[split]['groups'])

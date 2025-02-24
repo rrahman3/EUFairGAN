@@ -5,6 +5,9 @@ import torch
 import sys
 import os
 from src.utils.filename_manager import FilenameManager
+
+import src.utils.losses as loss_functions
+
 from src.pretrained.pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noise_sample,
                                        save_as_images, display_in_terminal)
 
@@ -109,11 +112,15 @@ discriminator = discriminator.to(device)
 from src.pretrained.BigGAN_PyTorch.BigGANdeep import Generator
 # biggan_model = Generator(n_classes=14)
 biggan_model = BigGAN.from_pretrained('biggan-deep-128')
-biggan_model.config.num_classes = 14
-biggan_model.embeddings = torch.nn.Linear(in_features=14, out_features=128, bias=True)
-load_path = 'outputs/fine_tune_biggan_nihccchest_transformer_NIHChestXray_20250201_121241/models/model_weights_epoch77_lr0.0001_20250201_121241.pth'
-biggan_model.load_state_dict(torch.load(load_path, map_location=torch.device('cpu')))
-print(f"Model loaded from {load_path}")
+biggan_model.config.num_classes = 3
+biggan_model.embeddings = torch.nn.Linear(in_features=3, out_features=128, bias=True)
+
+
+# load_path = 'outputs/fine_tune_biggan_nihccchest_transformer_NIHChestXray_20250201_121241/models/model_weights_epoch77_lr0.0001_20250201_121241.pth'
+# load_path = 'outputs/fine_tune_biggan_nihccchest_transformer_NIHChestXray_20250201_121241/models/model_weights_epoch77_lr0.0001_20250201_121241.pth'
+# biggan_model.load_state_dict(torch.load(load_path, map_location=torch.device('cpu')))
+# print(f"Model loaded from {load_path}")
+
 biggan_model = biggan_model.to(device)
 # for param in biggan_model.parameters():
     # print(param.device)
@@ -131,7 +138,6 @@ optimizer_D = Adam(discriminator.parameters(), lr=discriminator_learning_rate)
 
 criterion = BCEWithLogitsLoss()
 # Training loop
-
 from src.pretrained.BigGAN_PyTorch.utils import prepare_z_y
 
 def finetune_biggan(dataloader):
@@ -179,6 +185,7 @@ def finetune_biggan(dataloader):
                 real_loss = criterion(real_preds, torch.ones_like(real_preds).to(device))  # Use ones_like on the same device Real images as 1
                 fake_loss = criterion(fake_preds, torch.zeros_like(fake_preds).to(device))  # Use zeros_like on the same device, Fake iamge as 0
                 d_loss = real_loss + fake_loss
+                # d_loss = loss_functions.discriminator_hinge_loss(real_preds, fake_preds)
 
                 d_loss.backward()
                 optimizer_D.step()
@@ -197,6 +204,7 @@ def finetune_biggan(dataloader):
 
                 # Generator loss (tries to fool the discriminator)
                 g_loss = criterion(fake_preds, torch.ones_like(fake_preds))  # Fake images as 1
+                # g_loss = loss_functions.generator_hinge_loss(fake_preds)
 
                 g_loss.backward()
                 optimizer_G.step()

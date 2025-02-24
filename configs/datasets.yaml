@@ -81,53 +81,66 @@ datasets:
 
   UTKFace:
     train:
-      metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_train_images_location.csv"
-      img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
+      metadata_file: "data/UTKface_inthewild/UTKface_train_images_location.csv"
+      img_dir: "data/UTKface_inthewild/original_images/"
+      # metadata_file: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/UTKface_inthewild/UTKface_train_images_location.csv"
+      # img_dir: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
-      metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_validation_images_location.csv"
-      img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
+      metadata_file: "data/UTKface_inthewild/UTKface_validation_images_location.csv"
+      img_dir: "data/UTKface_inthewild/original_images/"
+      # metadata_file: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/UTKface_inthewild/UTKface_validation_images_location.csv"
+      # img_dir: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
       batch_size: 32
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
-      metadata_file: "../AUFairGAN/data/UTKface_inthewild/UTKface_test_images_location.csv"
-      img_dir: "../AUFairGAN/data/UTKface_inthewild/original_images/"
+      metadata_file: "data/UTKface_inthewild/UTKface_test_images_location.csv"
+      img_dir: "data/UTKface_inthewild/original_images/"
+      # metadata_file: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/UTKface_inthewild/UTKface_test_images_location.csv"
+      # img_dir: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/UTKface_inthewild/original_images/"
       frac: 1.00
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
       groups: ['male', 'female']
+      # groups: ['black', 'white']
 
   CelebA:
     train:
-      metadata_file: "../AUFairGAN/data/celeba/celeba_train.csv"
-      img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
+      metadata_file: "../data/celeba/celeba_train.csv"
+      img_dir: "../data/celeba/img_align_celeba/"
+      # metadata_file: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/celeba/celeba_train.csv"
+      # img_dir: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     val:
-      metadata_file: "../AUFairGAN/data/celeba/celeba_val.csv"
-      img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
+      metadata_file: "../data/celeba/celeba_val.csv"
+      img_dir: "../data/celeba/img_align_celeba/"
+      # metadata_file: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/celeba/celeba_val.csv"
+      # img_dir: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       batch_size: 32
       shuffle: True
       num_workers: 4  # Number of subprocesses for data loading
     test:
-      metadata_file: "../AUFairGAN/data/celeba/celeba_test.csv"
-      img_dir: "../AUFairGAN/data/celeba/img_align_celeba/"
+      metadata_file: "../data/celeba/celeba_test.csv"
+      img_dir: "../data/celeba/img_align_celeba/"
+      # metadata_file: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/celeba/celeba_test.csv"
+      # img_dir: "/users/rrahman3/uncertainty_fairness/AUFairGAN/data/celeba/img_align_celeba/"
       frac: 1.00
-      img_dim: (224, 224)
+      img_dim: (128, 128)
       groups: ['male', 'female']
       batch_size: 32
       shuffle: True

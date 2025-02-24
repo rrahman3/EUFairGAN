@@ -48,27 +48,38 @@ class TraditionalEvaluator:
 
     def compute_epoch_metrics(self):
         """Combine batch metrics to get epoch metrics."""
+            
+        try:
+            self.auc_scores = roc_auc_score(self.all_labels_binary, self.all_predictions_probabilities, multi_class='ovo')
+            self.f1_scores = f1_score(self.all_labels_direct, self.all_predictions_driect, average='macro')
+            self.accuracies = accuracy_score(self.all_labels_direct, self.all_predictions_driect)
+            self.conf_matrices = confusion_matrix(self.all_labels_direct, self.all_predictions_driect)
 
-        self.auc_scores = roc_auc_score(self.all_labels_binary, self.all_predictions_probabilities, multi_class='ovo')
+            self.epoch_metrics = {
+                'accuracy': self.accuracies,
+                'f1_score': self.f1_scores,
+                'auc': self.auc_scores,
+                'confusion_metrix': self.conf_matrices
+            }
         
-        self.f1_scores = f1_score(self.all_labels_direct, self.all_predictions_driect, average='macro')
+        except ValueError as e:
+            print(f"ValueError in compute_epoch_metrics: {e}")
+            self.epoch_metrics = {'error': f"ValueError: {str(e)}"}
         
-        self.accuracies = accuracy_score(self.all_labels_direct, self.all_predictions_driect)
+        except Exception as e:
+            print(f"Unexpected error in compute_epoch_metrics: {e}")
+            self.epoch_metrics = {'error': f"Unexpected error: {str(e)}"}
         
-        self.conf_matrices = confusion_matrix(self.all_labels_direct, self.all_predictions_driect)
-
-        self.epoch_metrics = {
-            'accuracy': self.accuracies,
-            'f1_score': self.f1_scores,
-            'auc': self.auc_scores,
-            'confusion_metrix': self.conf_matrices
-        }
         return self.epoch_metrics
 
     def print_metrics(self):
-        print(f"F1 Score: {self.epoch_metrics['f1_score']:.4f}", end='\t')
-        print(f"AUC: {self.epoch_metrics['auc']:.4f}", end='\t')
-        print(f"Accuracy: {self.epoch_metrics['accuracy']:.4f}", end='\t')
-        print(f"Confusion Metrics\n{self.epoch_metrics['confusion_metrix']}", end="\n\n")
-
+        try:
+            print(f"F1 Score: {self.epoch_metrics['f1_score']:.4f}", end='\t')
+            print(f"AUC: {self.epoch_metrics['auc']:.4f}", end='\t')
+            print(f"Accuracy: {self.epoch_metrics['accuracy']:.4f}", end='\t')
+            print(f"Confusion Metrics\n{self.epoch_metrics['confusion_metrix']}", end="\n\n")
+        
+        except Exception as e:
+            print(f"Unexpected error in compute_epoch_metrics: {e}")
+            self.epoch_metrics = {'error': f"Unexpected error: {str(e)}"}
 

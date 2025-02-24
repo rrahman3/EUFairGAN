@@ -2,6 +2,8 @@ from .cnn_model import CNNModel
 # from src.pretrained.MedViT import MedViT
 from src.models.cnn_model import CNNModel
 from src.models.transformer_model import ViT, ViT2
+from src.models.resnet50 import ResNet50
+
 import torch
 
 def model_factory(model_name, models_config):
@@ -38,6 +40,12 @@ def model_factory(model_name, models_config):
         # for NIHCC Chest Xray, out_features = 20
         model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=model_info['params']['num_classes'], bias=True)
         model.load_model(model_pth)
+
+    elif model_info['model_class'] == "ResNet50":
+        # model_class = globals()[model_info['model_class']]
+        model = ResNet50(num_classes=model_info['params']['num_classes'], pretrained=True)
+        # model.proj_head[0] = torch.nn.Linear(in_features=1024, out_features=model_info['params']['num_classes'], bias=True)
+        # model.load_model(model_pth)
 
     else:
         model_class = globals()[model_info['model_class']]  # Dynamically load class

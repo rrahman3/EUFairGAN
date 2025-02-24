@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from src.evaluations.traditional_evaluator import TraditionalEvaluator
-from src.utils.losses import crossentropy_loss
+# from src.utils.losses import crossentropy_loss
 from src.utils.filename_manager import FilenameManager
 from src.utils.results_writer import MetricsTracker
 from tqdm import tqdm
@@ -41,6 +41,7 @@ class TraditionalTrainer:
             raise ValueError(f"Unsupported optimizer: {self.optimizer_config}")
 
     def _initialize_loss_function(self):
+        return nn.CrossEntropyLoss()
         if self.loss_function_config == "cross_entropy":
             return crossentropy_loss
         elif self.loss_function_config == "nn.CrossEntropyLoss":
@@ -91,12 +92,12 @@ class TraditionalTrainer:
             self.optimizer.zero_grad()
 
             # Compute prediction and loss
-            pred = self.model(images)
+            pred, _ = self.model(images, images)
             
             loss = self.loss_function(pred, y)
             running_loss += loss.item()
-            print(pred[0])
-            print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
+            # print(pred[0])
+            # print(f'epoch {epoch}, batch {num_batch}: loss {loss.item()}')
 
             # Backpropagation
             loss.backward()
@@ -107,10 +108,9 @@ class TraditionalTrainer:
         
         epoch_loss = running_loss / num_batch
         print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
-        epoch_metrics = ''        
-        # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
-        # self.evaluation_metrics.print_metrics()
-        # self.evaluation_metrics.reset_metrics()
+        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        self.evaluation_metrics.print_metrics()
+        self.evaluation_metrics.reset_metrics()
 
         return epoch_loss, epoch_metrics
         
@@ -140,10 +140,10 @@ class TraditionalTrainer:
             
 
                 # Compute prediction and loss
-                pred = self.model(images)
+                pred, _ = self.model(images, images)
                 loss = self.loss_function(y, pred)
                 running_loss += loss.item()
-                print(f'validation batch {num_batch}: loss {loss.item()}')
+                # print(f'validation batch {num_batch}: loss {loss.item()}')
 
                 self.evaluation_metrics.update_metrics(y_true=y, y_pred=pred)
                 num_batch += 1
@@ -152,10 +152,10 @@ class TraditionalTrainer:
         epoch_loss = running_loss / num_batch
         print(f"Validation Loss: {epoch_loss:.4f}")
         epoch_metrics = ''
-        # epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
-        # print(f"Validation:\n")
-        # self.evaluation_metrics.print_metrics()
-        # self.evaluation_metrics.reset_metrics()
+        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        print(f"Validation:\n")
+        self.evaluation_metrics.print_metrics()
+        self.evaluation_metrics.reset_metrics()
 
         return epoch_loss, epoch_metrics
 

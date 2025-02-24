@@ -1,0 +1,322 @@
+import torch.nn as nn
+import torch.nn.functional as F
+from src.models.base_model import BaseModel
+
+class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)
+    def __init__(self, task='regression', drop_rate=0.50, hidden_layer=128):
+        super(UTKFaceAgeModel, self).__init__(model_name="UTKFaceAgeModel")
+        self.task = task
+        self.hidden_layer = hidden_layer
+
+        self.conv_1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
+        self.relu_1 = nn.ReLU()
+        self.max_pool_1 = nn.MaxPool2d(kernel_size=2)
+        self.dropout_1 = nn.Dropout(p=drop_rate)
+
+        self.conv_2 = nn.Conv2d(32, 64, kernel_size=3)
+        self.relu_2 = nn.ReLU()
+        self.max_pool_2 = nn.MaxPool2d(kernel_size=2)
+        self.dropout_2 = nn.Dropout(p=drop_rate)
+
+        self.conv_3 = nn.Conv2d(64, 128, kernel_size=3)
+        self.relu_3 = nn.ReLU()
+        self.max_pool_3 = nn.MaxPool2d(kernel_size=2)
+        self.dropout_3 = nn.Dropout(p=drop_rate)
+
+        self.flatten = nn.Flatten()
+        self.dropout_4 = nn.Dropout(p=drop_rate)
+        self.dense_1 = nn.LazyLinear(self.hidden_layer)
+        
+        if self.task == 'regression':
+            # Regression: Predict age (scalar) and its log variance
+            self.age_head = nn.Linear(self.hidden_layer, 1)
+            self.log_var_head = nn.Linear(self.hidden_layer, 1)
+        
+        elif self.task == 'classification':
+            # Classification: Predict class logits and a log variance for each class.
+            # Assumes self.num_classes is defined in BaseModel.
+            self.logit_head = nn.Linear(self.hidden_layer, self.num_classes)
+            self.log_var_head = nn.Linear(self.hidden_layer, self.num_classes)
+        else:
+            raise ValueError("Task must be either 'regression' or 'classification'.")
+        
+        
+    def forward(self, images):
+        """
+        Forward pass for both tasks.
+        
+
+        Args:
+            images (Tensor): Input image batch of shape (batch, 3, H, W).
+            genders (Tensor, optional): Optional gender input (if used); currently ignored.
+            mc_samples (int): Number of Monte Carlo samples (only used in classification).
+        
+        Returns:
+            For regression:
+                (age, log_var) – both of shape (batch, 1)
+            For classification:
+                Tensor of shape (mc_samples, batch, num_classes) containing MC-sampled logits.
+        """
+
+        # images, genders = inputs
+        # print(f"Image_Shape {images.shape}")
+        # print(f"Gender Shape {genders.shape}")
+
+        x = self.conv_1(images)
+        x = self.relu_1(x)
+        x = self.max_pool_1(x)
+        x = self.dropout_1(x)
+
+        x = self.conv_2(x)
+        x = self.relu_2(x)
+        x = self.max_pool_2(x)
+        x = self.dropout_2(x)
+
+        x = self.conv_3(x)
+        x = self.relu_3(x)
+        x = self.max_pool_3(x)
+        x = self.dropout_3(x)
+
+        x = self.flatten(x)
+        x = self.dropout_4(x)
+        x = self.dense_1(x)
+        
+        if self.task == 'regression':
+            # Heteroscedastic regression: predict age and log variance.
+            age = self.age_head(x)
+            log_var = self.log_var_head(x)
+            # Optionally, you could use softplus on log_var to ensure numerical stability.
+            # However, many loss functions expect the raw log variance.
+            return age, log_var
+        
+        variance = self.variance(x)
+        variance = F.softplus(variance)
+        x = self.dense_2(x)
+        return x, variance
+
+
+    def save_model(self, model_saved_path):
+        super().save_model(model_saved_path)
+
+
+
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from src.evaluations.monte_carlo import MultiLabelEvaluator as Evaluator
+from src.utils.filename_manager import FilenameManager
+from src.utils.results_writer import MetricsTracker
+from src.utils.losses import BNN_BCEWithLogitsLoss, BNN_CrossEntropyLoss
+from tqdm import tqdm
+
+from src.utils.losses import heteroscedastic_loss
+
+class Trainer:
+    def __init__(self, model, dataloader, config):
+        self.model = model
+        self.dataloader = dataloader
+        self.num_samples = len(self.dataloader.dataset)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
+
+        # Load configuration settings
+        self.training_config = config['training']
+        self.optimizer_config = self.training_config['optimizer']
+        self.learning_rate = self.training_config['learning_rate']
+        self.loss_function_config = self.training_config['loss_function']
+        self.num_epochs = self.training_config['num_epochs']
+
+        # Initialize optimizer and loss function
+        self.optimizer = self._initialize_optimizer()
+        self.loss_function = self._initialize_loss_function()
+
+        self.evaluation_metrics = Evaluator()
+        self.log_file_path = FilenameManager().get_filename('training_log')
+        self.results_writer = MetricsTracker(self.log_file_path)
+
+    def _initialize_optimizer(self):
+        if self.optimizer_config == "adam":
+            return optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        else:
+            raise ValueError(f"Unsupported optimizer: {self.optimizer_config}")
+
+    
+    def _initialize_loss_function(self):
+        return heteroscedastic_loss
+        # if self.loss_function_config == "bnn_cross_entropy":
+        #     return BNN_CrossEntropyLoss
+        # elif self.loss_function_config == "bnn_binary_cross_entropy":
+        #     print("BNN_CrossEntropyLoss")
+        #     return BNN_CrossEntropyLoss
+        # elif self.loss_function_config == "nn.CrossEntropyLoss":
+        #     return nn.CrossEntropyLoss()
+        # else:
+        #     raise ValueError(f"Unsupported loss function: {self.loss_function_config}")
+
+    def train(self, val_loader):
+
+        for epoch in range(1, self.num_epochs+1):
+            print(f"Epoch [{epoch}/{self.num_epochs}]")
+
+            val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
+            train_loss, train_metrics = self.train_epoch(epoch=epoch)
+
+            model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
+            self.model.save_model(model_saved_path)
+
+            self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
+            self.results_writer.save()
+
+
+    def train_epoch(self, epoch):
+        self.evaluation_metrics.reset_metrics()
+        self.model.train()
+
+        running_loss = 0.0
+
+        for batch, (images, _, y)  in enumerate(tqdm(self.dataloader, desc="Processing Training Batches")):
+            images, y = images.to(self.device), y.to(self.device)
+            if epoch == 1 and batch == 0:
+                print(f'{images.shape}, {y.shape}')
+
+            self.model.train()
+            self.optimizer.zero_grad()
+
+            # Compute prediction and loss
+            pred, var = self.model(images, _)
+            loss = self.loss_function(pred, y, var)
+            running_loss += loss.item()
+
+            # Backpropagation
+            loss.backward()
+            self.optimizer.step()
+            self.evaluation_metrics.update_metrics(batch_y_true=y, batch_y_pred=pred, batch_y_variance=var)
+        
+        epoch_loss = running_loss / len(self.dataloader)
+        print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
+        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        self.evaluation_metrics.print_metrics()
+        self.evaluation_metrics.reset_metrics()
+
+        return epoch_loss, epoch_metrics
+        
+
+    def validate_epoch(self, val_loader):
+        self.model.eval()
+        self.evaluation_metrics.reset_metrics()
+
+        running_loss = 0.0
+        with torch.no_grad():
+            for batch, (images, _, y)  in enumerate(tqdm(val_loader, desc="Processing Validation Batches")):
+                images, y = images.to(self.device), y.to(self.device)
+                if batch == 0:
+                    print(f'{images.shape}, {y.shape}')
+
+                # Compute prediction and loss
+                pred, var = self.model(images, _)
+                loss = self.loss_function(pred, y, var)
+                running_loss += loss.item()
+
+                self.evaluation_metrics.update_metrics(batch_y_true=y, batch_y_pred=pred, batch_y_variance=var)
+
+            
+        epoch_loss = running_loss / len(val_loader)
+        print(f"Validation Loss: {epoch_loss:.4f}")
+        epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
+        print(f"Validation:\n")
+        self.evaluation_metrics.print_metrics()
+        self.evaluation_metrics.reset_metrics()
+
+        return epoch_loss, epoch_metrics
+
+
+
+from src.utils.config_reader import ConfigReader
+from src.dataloader.dataloader_factory import dataloader_factory
+from src.models.model_factory import model_factory
+from src.evaluations.monte_carlo import MonteCarloPrediction
+
+import argparse
+if __name__ == "__main__":
+    import os
+    print(os.getcwd())
+    parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
+    parser.add_argument('--model', default='UTKFaceAgeModel',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--dataset', default='UTKFace', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    # parser.add_argument('--dataset', default='CheXpert', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
+    parser.add_argument('--task', default='train_bnn',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    # parser.add_argument('--task', default='check_medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    # parser.add_argument('--task', default='fine_tune_biggan',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+    parser.add_argument('--task_config', default='medvit_test',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
+
+    args = parser.parse_args()
+    print(args)
+
+
+    dataset_name = args.dataset
+    model_name = args.model
+    task_name = args.task
+    task_config_name = args.task_config
+
+    print(args)
+    
+    file_manger = FilenameManager(model_name=model_name, dataset_name=dataset_name, task_name=task_name)
+
+    # Load configuration files
+    configs = ConfigReader().load_all_configs()
+    datasets_config = configs['datasets']
+    models_config = configs['models']
+    config = configs['project']
+
+    # Device configuration (GPU or CPU)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    print(f"Initializing DataLoader for {dataset_name}...")
+    # Initialize DataLoader for the specified dataset
+    dataset_info = datasets_config['datasets'].get(dataset_name)
+    print(dataset_info)
+    print(dataset_info['train']['img_dim'])
+    if dataset_info is None:
+        raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
+    
+    # Create the DataLoaders for train, validation, and test splits
+    train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
+    val_loader = dataloader_factory(dataset_name, 'val', dataset_info)
+
+    male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
+    female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
+    print("Model Config", models_config)
+    model = model_factory(model_name=model_name, models_config=models_config)
+    print(model)
+
+    N_MonteCarloSimulation = config['N_MonteCarloSimulation']
+    
+    if task_name == 'train_bnn':
+
+        # Initialize Trainer
+        print(f"Training {model_name} on {dataset_name}...")
+        trainer = Trainer(
+            model=model,
+            dataloader=train_loader,
+            config=config
+        )
+
+        # Train the model
+        trainer.train(val_loader)
+
+    elif task_name == 'test_bnn':
+        task_config = config[task_name][task_config_name]
+        print(task_config)
+
+        model_saved_location = task_config['bnn_model_location']
+        model.load_model(model_saved_location)        
+
+        print('Male test')
+        male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+        male_monte_carlo.asfsdgd()
+
+        print('Female test')
+        female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+        female_monte_carlo.asfsdgd()
+
