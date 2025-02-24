@@ -575,6 +575,7 @@ if __name__ == "__main__":
         model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
         # task_config['bnn_model_location']
         model.load_model(model_saved_location)        
+        model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
         print('Male test')
         male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
