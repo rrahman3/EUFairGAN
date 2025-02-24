@@ -460,10 +460,10 @@ class MonteCarloPredictionRegression:
             # Aleatoric uncertainty is the average predicted variance.
             alea_unc = np.mean(y_var_samples, axis=1)  # (batch, 1)
 
-            y_true_all.extend(y.detach().cpu().numpy())
-            y_pred_all.extend(y_pred_mean)
-            epistemic_all.extend(epi_unc)
-            aleatoric_all.extend(alea_unc)
+            y_true_all.append(y.detach().cpu().numpy())
+            y_pred_all.append(y_pred_mean)
+            epistemic_all.append(epi_unc)
+            aleatoric_all.append(alea_unc)
 
         # Concatenate results from all batches.
         y_true_all = np.concatenate(y_true_all, axis=0)
