@@ -277,7 +277,7 @@ class Trainer:
         self.optimizer = self._initialize_optimizer()
         self.loss_function = self._initialize_loss_function()
 
-        self.evaluation_metrics = MultiLabelEvaluator()
+        self.evaluation_metrics = MultiLabelEvaluator(eval_type="mae")
         self.log_file_path = FilenameManager().get_filename('training_log')
         self.results_writer = MetricsTracker(self.log_file_path)
 
