@@ -169,8 +169,8 @@ class Trainer:
         for epoch in range(1, self.num_epochs+1):
             print(f"Epoch [{epoch}/{self.num_epochs}]")
 
-            val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
             train_loss, train_metrics = self.train_epoch(epoch=epoch)
+            val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
 
             model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
             self.model.save_model(model_saved_path)
@@ -185,7 +185,7 @@ class Trainer:
 
         running_loss = 0.0
 
-        for batch, (images, _, y)  in enumerate(tqdm(self.dataloader, desc="Processing Training Batches")):
+        for batch, (images, y)  in enumerate(tqdm(self.dataloader, desc="Processing Training Batches")):
             images, y = images.to(self.device), y.to(self.device)
             if epoch == 1 and batch == 0:
                 print(f'{images.shape}, {y.shape}')
@@ -194,10 +194,11 @@ class Trainer:
             self.optimizer.zero_grad()
 
             # Compute prediction and loss
-            pred, var = self.model(images, _)
+            pred, var = self.model(images)
             loss = self.loss_function(pred, y, var)
             running_loss += loss.item()
-
+            if epoch == 1 and batch == 0:
+                print(f"model output dims: pred: {pred.shape} variance: {var.shape} true: {y.shape}")
             # Backpropagation
             loss.backward()
             self.optimizer.step()
@@ -218,13 +219,13 @@ class Trainer:
 
         running_loss = 0.0
         with torch.no_grad():
-            for batch, (images, _, y)  in enumerate(tqdm(val_loader, desc="Processing Validation Batches")):
+            for batch, (images, y)  in enumerate(tqdm(val_loader, desc="Processing Validation Batches")):
                 images, y = images.to(self.device), y.to(self.device)
                 if batch == 0:
                     print(f'{images.shape}, {y.shape}')
 
                 # Compute prediction and loss
-                pred, var = self.model(images, _)
+                pred, var = self.model(images)
                 loss = self.loss_function(pred, y, var)
                 running_loss += loss.item()
 

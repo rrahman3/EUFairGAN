@@ -47,8 +47,8 @@ class UTKFaceDataset(Dataset):
             
             # return sample['lr_image'], sample['hr_image'], sample['gender'], sample['age_classification']
             if self.task == 2:
-                return sample['lr_image'], sample['age_classification']
-            return sample['lr_image'], sample['gender'], sample['age_classification']
+                return sample['lr_image'], sample['age_regression']
+            return sample['lr_image'], sample['gender'], sample['age_regression']
         
         except KeyError as e:
             print(idx)
