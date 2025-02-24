@@ -569,10 +569,10 @@ if __name__ == "__main__":
         trainer.train(val_loader)
 
     elif task_name == 'test_bnn':
-        task_config = config[task_name][task_config_name]
-        print(task_config)
+        # task_config = config[task_name][task_config_name]
+        # print(task_config)
 
-        model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_87_lr_0.005_20250224_121334.pth"
+        model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
         # task_config['bnn_model_location']
         model.load_model(model_saved_location)        
 
