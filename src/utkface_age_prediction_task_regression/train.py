@@ -350,7 +350,7 @@ class Trainer:
         
 
     def validate_epoch(self, val_loader):
-        self.model.eval()
+        self.model.train()
         self.evaluation_metrics.reset_metrics()
 
         running_loss = 0.0
@@ -378,6 +378,110 @@ class Trainer:
         return epoch_loss, epoch_metrics
 
 
+import numpy as np
+import torch
+from tqdm import tqdm
+from sklearn.metrics import mean_absolute_error
+
+class MonteCarloPredictionRegression:
+    def __init__(self, model, dataloader, N=10):
+        """
+        Args:
+            model: A heteroscedastic regression model that returns (predicted_mean, log_variance).
+            dataloader: Dataloader for the test set.
+            N (int): Number of Monte Carlo forward passes.
+        """
+        self.model = model
+        self.dataloader = dataloader
+        self.N = N
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # For regression, we use a simple evaluation (e.g. MAE)
+
+    def get_prediction(self, images):
+        """
+        Obtain a single prediction from the model.
+        
+        Returns:
+            y_pred: Predicted mean as a NumPy array with shape (batch, 1, 1)
+            y_var: Predicted variance (obtained from exp(log_var)) with shape (batch, 1, 1)
+        """
+        self.model.train()  # Activate dropout for MC sampling.
+        with torch.no_grad():
+            y_pred, y_log_var = self.model(images)
+
+        # Detach and convert to NumPy, then add a new axis for MC sampling stacking.
+        y_pred = y_pred.detach().cpu().numpy()  # shape: (batch, 1)
+        y_log_var = y_log_var.detach().cpu().numpy()  # shape: (batch, 1)
+        y_var = np.exp(y_log_var)
+        return y_pred, y_var
+
+    def run_predictions(self):
+        """
+        Runs MC sampling over the entire test set, computing:
+            - Mean prediction (MC average)
+            - Epistemic uncertainty (variance of predictions)
+            - Aleatoric uncertainty (average predicted variance)
+        Also computes the Mean Absolute Error (MAE).
+        
+        Returns:
+            y_true_all, y_pred_all, aleatoric_all, epistemic_all
+        """
+        y_true_all = []
+        y_pred_all = []
+        epistemic_all = []
+        aleatoric_all = []
+
+        # Activate dropout for MC sampling.
+        for batch_data in tqdm(self.dataloader):
+            images, y = batch_data
+            batch_size = images.shape[0]
+            # Containers to store MC samples (shape: [batch, N, 1])
+            y_pred_samples = np.empty((batch_size, self.N, 1))
+            y_var_samples = np.empty((batch_size, self.N, 1))
+
+            for i in range(self.N):
+                y_pred, y_var = self.get_prediction(images)
+                y_var = torch.exp(y_var)
+                # y_pred and y_var are of shape (batch, 1, 1); squeeze the extra dimension.
+                y_pred_samples[:, i, :] = y_pred[:, 0, :]
+                y_var_samples[:, i, :] = y_var[:, 0, :]
+
+            # Compute the Monte Carlo mean prediction.
+            y_pred_mean = np.mean(y_pred_samples, axis=1)  # (batch, 1)
+            # Epistemic uncertainty is the variance across the N predictions.
+            epi_unc = np.var(y_pred_samples, axis=1)  # (batch, 1)
+            # Aleatoric uncertainty is the average predicted variance.
+            alea_unc = np.mean(y_var_samples, axis=1)  # (batch, 1)
+
+            y_true_all.extend(y.detach().cpu().numpy())
+            y_pred_all.extend(y_pred_mean)
+            epistemic_all.extend(epi_unc)
+            aleatoric_all.extend(alea_unc)
+
+        # Concatenate results from all batches.
+        y_true_all = np.concatenate(y_true_all, axis=0)
+        y_pred_all = np.concatenate(y_pred_all, axis=0)
+        epistemic_all = np.concatenate(epistemic_all, axis=0)
+        aleatoric_all = np.concatenate(aleatoric_all, axis=0)
+
+        # Compute evaluation metric: MAE.
+        mae = mean_absolute_error(y_true_all, y_pred_all)
+        print(f"MAE: {mae:.4f}")
+
+        # Compute average uncertainties.
+        avg_epi = np.mean(epistemic_all)
+        avg_alea = np.mean(aleatoric_all)
+        print(f"Average Epistemic Uncertainty: {avg_epi:.4f}")
+        print(f"Average Aleatoric Uncertainty: {avg_alea:.4f}")
+        return mae, y_pred_all, avg_alea, avg_epi
+
+        # return y_true_all, y_pred_all, aleatoric_all, epistemic_all
+
+# Example usage:
+# Assuming `model_reg` is your trained heteroscedastic regression model,
+# and `test_loader` is your test DataLoader.
+# predictor = MonteCarloPredictionRegression(model_reg, test_loader, N=100)
+# y_true, y_pred, alea_unc, epi_unc = predictor.run_predictions()
 
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory
@@ -453,18 +557,18 @@ if __name__ == "__main__":
         # Train the model
         trainer.train(val_loader)
 
-    elif task_name == 'test_bnn':
-        task_config = config[task_name][task_config_name]
-        print(task_config)
+    # elif task_name == 'test_bnn':
+    #     task_config = config[task_name][task_config_name]
+    #     print(task_config)
 
-        model_saved_location = task_config['bnn_model_location']
-        model.load_model(model_saved_location)        
+    #     model_saved_location = task_config['bnn_model_location']
+    #     model.load_model(model_saved_location)        
 
         print('Male test')
-        male_monte_carlo = MonteCarloPrediction(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
-        male_monte_carlo.asfsdgd()
+        male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+        male_monte_carlo.run_predictions()
 
         print('Female test')
-        female_monte_carlo = MonteCarloPrediction(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
-        female_monte_carlo.asfsdgd()
+        female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+        female_monte_carlo.run_predictions()
 
