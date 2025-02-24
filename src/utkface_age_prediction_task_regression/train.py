@@ -473,6 +473,7 @@ class MonteCarloPredictionRegression:
         avg_alea = np.mean(aleatoric_all)
         print(f"Average Epistemic Uncertainty: {avg_epi:.4f}")
         print(f"Average Aleatoric Uncertainty: {avg_alea:.4f}")
+        
         return mae, y_pred_all, avg_alea, avg_epi
 
         # return y_true_all, y_pred_all, aleatoric_all, epistemic_all
