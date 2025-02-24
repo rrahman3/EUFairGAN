@@ -109,12 +109,148 @@ class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)
         super().save_model(model_saved_path)
 
 
+import torch
+from sklearn.metrics import f1_score, roc_auc_score, accuracy_score, confusion_matrix, precision_score, recall_score, hamming_loss
+import numpy as np
+from math import log10
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from sklearn.metrics import accuracy_score, hamming_loss, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, mean_absolute_error
 
+    
+class MultiLabelEvaluator:
+    def __init__(self, n_labels=14, threshold=0.5, eval_type="multilabel"):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.n_labels = n_labels  # Number of labels per sample
+        self.threshold = threshold  # Threshold for binary classification
+        self.eval_type = eval_type.lower()
+        self.reset_metrics()
+
+    def reset_metrics(self):
+        self.y_true = torch.tensor([]).to(self.device)
+        self.y_score = torch.tensor([]).to(self.device)
+        self.y_au_score = torch.tensor([]).to(self.device)
+
+    def update_metrics(self, batch_y_true, batch_y_pred, batch_y_variance): # y_ture is the binary form of the y_true (None, 1, num_classes) # [[0, 0, 1, 0]] (1, 1, 4)
+
+        # Get predictions
+
+        self.y_true = torch.cat((self.y_true, batch_y_true.clone().detach()), 0)
+        self.y_score = torch.cat((self.y_score, batch_y_pred.clone().detach()), 0)
+
+        self.y_au_score = torch.cat((self.y_au_score, batch_y_variance.clone().detach()), 0)
+
+
+    def apply_threshold(self, y_pred):
+        """
+        Apply threshold to the predicted probabilities to convert to binary labels.
+        """
+        return (y_pred >= self.threshold).astype(int)
+
+    def compute_epoch_metrics(self, epoch_y_pred=None, epoch_y_true=None, epoch_y_au_score=None):
+        """
+        Compute metrics for the epoch according to eval_type.
+        
+        Returns:
+            A dictionary containing the computed metrics.
+        """
+        # Use provided epoch predictions if given; otherwise use stored ones.
+        if epoch_y_pred is None:
+            y_score = self.y_score.detach().cpu().numpy()
+        else:
+            y_score = epoch_y_pred
+        if epoch_y_true is None:
+            y_true = self.y_true.detach().cpu().numpy()
+        else:
+            y_true = epoch_y_true
+        if epoch_y_au_score is None:
+            y_au_score = self.y_au_score.detach().cpu().numpy()
+        else:
+            y_au_score = epoch_y_au_score
+
+        metrics = {}
+
+        if self.eval_type == "mae":
+            # Compute Mean Absolute Error treating predictions as continuous.
+            mae = mean_absolute_error(y_true, y_score)
+            metrics["mae"] = mae
+
+        else:
+            # For classification tasks, first apply threshold to get binary predictions.
+            y_pred_bin = self.apply_threshold(y_score)
+
+            if self.eval_type == "binary":
+                # When there is a single label per sample.
+                acc = accuracy_score(y_true.ravel(), y_pred_bin.ravel())
+                metrics["accuracy"] = acc
+                metrics["hamming_loss"] = hamming_loss(y_true, y_pred_bin)
+                metrics["precision"] = precision_score(y_true, y_pred_bin, average='binary', zero_division=0)
+                metrics["recall"] = recall_score(y_true, y_pred_bin, average='binary', zero_division=0)
+                metrics["f1_score"] = f1_score(y_true, y_pred_bin, average='binary', zero_division=0)
+                try:
+                    metrics["auc_roc"] = roc_auc_score(y_true, y_score)
+                except ValueError:
+                    metrics["auc_roc"] = None
+                # Print confusion matrix
+                cm = confusion_matrix(y_true, y_pred_bin)
+                print("Confusion matrix:\n", cm)
+
+            elif self.eval_type == "multilabel":
+                # Compute metrics per label and then average.
+                acc = 0
+                for label in range(y_true.shape[1]):
+                    label_acc = accuracy_score(y_true[:, label], y_pred_bin[:, label])
+                    acc += label_acc
+                metrics["accuracy"] = acc / y_true.shape[1]
+                metrics["hamming_loss"] = hamming_loss(y_true, y_pred_bin)
+                metrics["precision"] = precision_score(y_true, y_pred_bin, average='macro', zero_division=0)
+                metrics["recall"] = recall_score(y_true, y_pred_bin, average='macro', zero_division=0)
+                metrics["f1_score"] = f1_score(y_true, y_pred_bin, average='macro', zero_division=0)
+
+                auc = 0
+                valid_labels = 0
+                for i in range(y_true.shape[1]):
+                    if len(np.unique(y_true[:, i])) > 1:
+                        try:
+                            label_auc = roc_auc_score(y_true[:, i], y_score[:, i])
+                            auc += label_auc
+                            valid_labels += 1
+                        except ValueError:
+                            print(f"Label {i}: AUC computation failed.")
+                    else:
+                        print(f"Skipping label {i}: only one class present.")
+                metrics["auc_roc"] = auc / valid_labels if valid_labels > 0 else 0.0
+
+                # Print confusion matrices per label.
+                for i in range(y_true.shape[1]):
+                    y_true_label = y_true[:, i]
+                    y_pred_label = y_pred_bin[:, i]
+                    cm = confusion_matrix(y_true_label, y_pred_label)
+                    print(f"Confusion matrix for label {i}:\n{cm}")
+
+        # Add the mean aleatoric uncertainty to the metrics.
+        metrics["aleatoric"] = float(np.mean(y_au_score))
+        self.epoch_metrics = metrics
+        return metrics
+
+    
+    def print_metrics(self):
+        m = self.epoch_metrics
+        if self.eval_type == "mae":
+            print(f"MAE: {m['mae']:.4f}\tAleatoric Uncertainty: {m['aleatoric']:.5f}")
+        else:
+            print(f"ROC AUC: {m.get('auc_roc', 0):.4f}", end='\t')
+            print(f"Accuracy: {m.get('accuracy', 0):.4f}", end='\t')
+            print(f"F1 Score: {m.get('f1_score', 0):.4f}", end='\t')
+            print(f"Recall: {m.get('recall', 0):.4f}", end='\t')
+            print(f"Precision: {m.get('precision', 0):.4f}", end='\t')
+            print(f"Hamming Loss: {m.get('hamming_loss', 0):.4f}", end='\t')
+        print(f"Aleatoric Uncertainty: {m.get('aleatoric', 0):.5f}")
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from src.evaluations.monte_carlo import MultiLabelEvaluator as Evaluator
+# from src.evaluations.monte_carlo import MultiLabelEvaluator as Evaluator
 from src.utils.filename_manager import FilenameManager
 from src.utils.results_writer import MetricsTracker
 from src.utils.losses import BNN_BCEWithLogitsLoss, BNN_CrossEntropyLoss
@@ -141,7 +277,7 @@ class Trainer:
         self.optimizer = self._initialize_optimizer()
         self.loss_function = self._initialize_loss_function()
 
-        self.evaluation_metrics = Evaluator()
+        self.evaluation_metrics = MultiLabelEvaluator()
         self.log_file_path = FilenameManager().get_filename('training_log')
         self.results_writer = MetricsTracker(self.log_file_path)
 
