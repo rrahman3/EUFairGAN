@@ -297,7 +297,8 @@ if __name__ == "__main__":
     male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
-    model = model_factory(model_name=model_name, models_config=models_config)
+    model = UTKFaceAgeModel(task='regression', drop_rate=0.5, hidden_layer=128)
+    # model = model_factory(model_name=model_name, models_config=models_config)
     print(model)
 
     N_MonteCarloSimulation = config['N_MonteCarloSimulation']
