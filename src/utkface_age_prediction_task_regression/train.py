@@ -1,5 +1,15 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import os
+import sys
+# sys.path.insert(0, os.path.abspath('../../'))
+# print(sys.path)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Assume that 'src' is in the parent directory of the parent directory of the current file.
+project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
+sys.path.insert(0, project_root)
+print("Project root added to sys.path:", project_root)
+
 from src.models.base_model import BaseModel
 
 class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)

@@ -141,6 +141,7 @@ if __name__ == "__main__":
     import os
     print(os.getcwd())
     # Argument parsing
+    
     parser = argparse.ArgumentParser(description="Train and evaluate a model on a specified dataset.")
     parser.add_argument('--model', default='nihccchest_transformer',  type=str, required=False, help='Name of the model to train (e.g., cnn, resnet)')
     parser.add_argument('--dataset', default='NIHChestXray', type=str, required=False, help='Name of the dataset to use (e.g., dataset1, dataset2)')
