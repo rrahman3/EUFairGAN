@@ -75,6 +75,38 @@ class ResidualBlock(nn.Module):
         out += identity
         out = self.relu(out)
         return out
+    
+
+import torchvision.models as models
+from src.models.base_model import BaseModel
+
+class ResNet50_AgeRegressionModel(BaseModel):
+    def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
+        super(ResNet50_AgeRegressionModel, self).__init__(model_name="ResNet50 Age Regression Model")
+        self.model = models.resnet50(pretrained=pretrained)
+        in_features = self.model.fc.in_features
+        
+        # Replace the original fully connected layer with a shared feature extractor.
+        self.model.fc = nn.Sequential(
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(p=0.5)
+        )
+        
+        # Define two heads:
+        # - age_head: predicts the age (a scalar)
+        # - log_var_head: predicts the log variance for uncertainty
+        self.age_head = nn.Linear(512, 1)
+        self.log_var_head = nn.Linear(512, 1)
+    
+    def forward(self, x, y):
+        features = self.model(x)
+        age = self.age_head(features)
+        log_var = self.log_var_head(features)
+        return age, log_var
+    
+    def save_model(self, model_saved_path):
+        super().save_model(model_saved_path)
 
 class UTKFaceResidualBlockAgeModel(BaseModel):
     def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128):
@@ -131,7 +163,7 @@ class UTKFaceResidualBlockAgeModel(BaseModel):
         # Optionally, apply softplus to log_var for stability: log_var = F.softplus(log_var)
         return age, log_var
 
-        
+       
 class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)
     def __init__(self, task='regression', drop_rate=0.50, hidden_layer=128):
         super(UTKFaceAgeModel, self).__init__(model_name="UTKFaceAgeModel")
@@ -683,7 +715,7 @@ if __name__ == "__main__":
     male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
-    model = UTKFaceResidualBlockAgeModel(task='regression', drop_rate=0.5, hidden_layer=128)
+    model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.5, hidden_layer=128)
     # model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
     # task_config['bnn_model_location']
     # model.load_model(model_saved_location) 
