@@ -404,6 +404,7 @@ class MonteCarloPredictionRegression:
         self.dataloader = dataloader
         self.N = N
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"Monte Carlo dropout -- N = {self.N}")
         # For regression, we use a simple evaluation (e.g. MAE)
 
     def get_prediction(self, images):
@@ -461,11 +462,13 @@ class MonteCarloPredictionRegression:
             epi_unc = np.var(y_pred_samples, axis=1)  # (batch, 1)
             # Aleatoric uncertainty is the average predicted variance.
             alea_unc = np.mean(y_var_samples, axis=1)  # (batch, 1)
+            print(f"Batch dimension of the testing set {y_pred_mean.shape}{epi_unc.shape}{alea_unc.shape}")
 
             y_true_all.append(y.detach().cpu().numpy())
             y_pred_all.append(y_pred_mean)
             epistemic_all.append(epi_unc)
             aleatoric_all.append(alea_unc)
+            print(f"All batch dimension of the testing set {y_true_all.shape}{y_pred_all.shape}{epistemic_all.shape}{aleatoric_all.shape}")
 
         # Concatenate results from all batches.
         y_true_all = np.concatenate(y_true_all, axis=0)
@@ -580,24 +583,24 @@ if __name__ == "__main__":
         model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
         print('Male test')
-        trainer = Trainer(
-            model=model,
-            dataloader=train_loader,
-            config=config
-        )
+        # trainer = Trainer(
+        #     model=model,
+        #     dataloader=train_loader,
+        #     config=config
+        # )
 
         # Train the model
         # trainer.train(val_loader)
-        for _ in range(10):
-            print(f"inference stage {_}")
-            print("male")
-            val_loss, val_metrics = trainer.validate_epoch(val_loader=male_test_loader)
-            print("female")
-            val_loss, val_metrics = trainer.validate_epoch(val_loader=female_test_loader)
-        # male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
-        # male_monte_carlo.run_predictions()
+        # for _ in range(10):
+        #     print(f"inference stage {_}")
+        #     print("male")
+        #     val_loss, val_metrics = trainer.validate_epoch(val_loader=male_test_loader)
+        #     print("female")
+        #     val_loss, val_metrics = trainer.validate_epoch(val_loader=female_test_loader)
+        male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+        male_monte_carlo.run_predictions()
 
         print('Female test')
-        # female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
-        # female_monte_carlo.run_predictions()
+        female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+        female_monte_carlo.run_predictions()
 
