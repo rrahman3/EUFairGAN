@@ -99,7 +99,7 @@ class ResNet50_AgeRegressionModel(BaseModel):
         self.age_head = nn.Linear(512, 1)
         self.log_var_head = nn.Linear(512, 1)
     
-    def forward(self, x, y):
+    def forward(self, x):
         features = self.model(x)
         age = self.age_head(features)
         log_var = self.log_var_head(features)
