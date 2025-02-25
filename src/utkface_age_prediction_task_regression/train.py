@@ -29,11 +29,11 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
         Tensor: The computed loss (a scalar).
     """
     # Compute the precision as the exponential of the negative log variance.
-    # precision = torch.exp(-log_var)
+    precision = torch.exp(-log_var)
     
     # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
-    # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
-    loss = 0.5 * (y_true - y_pred) ** 2
+    loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
+    # loss = 0.5 * (y_true - y_pred) ** 2
     
     # Return the mean loss over the batch.
     return loss.mean()
