@@ -422,8 +422,8 @@ class MonteCarloPredictionRegression:
         # Detach and convert to NumPy, then add a new axis for MC sampling stacking.
         y_pred = y_pred.detach().cpu().numpy()  # shape: (batch, 1)
         y_log_var = y_log_var.detach().cpu().numpy()  # shape: (batch, 1)
-        y_var = np.exp(y_log_var)
-        return y_pred, y_var
+        # y_log_var = np.exp(y_log_var)
+        return y_pred, y_log_var
 
     def run_predictions(self):
         """
@@ -462,13 +462,13 @@ class MonteCarloPredictionRegression:
             epi_unc = np.var(y_pred_samples, axis=1)  # (batch, 1)
             # Aleatoric uncertainty is the average predicted variance.
             alea_unc = np.mean(y_var_samples, axis=1)  # (batch, 1)
-            print(f"Batch dimension of the testing set {y_pred_mean.shape}{epi_unc.shape}{alea_unc.shape}")
+            # print(f"Batch dimension of the testing set {y_pred_mean.shape}{epi_unc.shape}{alea_unc.shape}")
 
             y_true_all.append(y.detach().cpu().numpy())
             y_pred_all.append(y_pred_mean)
             epistemic_all.append(epi_unc)
             aleatoric_all.append(alea_unc)
-            print(f"All batch dimension of the testing set {len(y_true_all)}{len(y_pred_all)}{len(epistemic_all)}{len(aleatoric_all)}")
+            # print(f"All batch dimension of the testing set {len(y_true_all)}{len(y_pred_all)}{len(epistemic_all)}{len(aleatoric_all)}")
 
         # Concatenate results from all batches.
         y_true_all = np.concatenate(y_true_all, axis=0)
