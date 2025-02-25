@@ -307,6 +307,8 @@ class Trainer:
 
             train_loss, train_metrics = self.train_epoch(epoch=epoch)
             val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
+            val_loss, val_metrics = self.validate_epoch(val_loader=male_test_loader)
+            val_loss, val_metrics = self.validate_epoch(val_loader=female_test_loader)
 
             model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
             self.model.save_model(model_saved_path)
@@ -578,10 +580,20 @@ if __name__ == "__main__":
         model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
         print('Male test')
-        male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
-        male_monte_carlo.run_predictions()
+        trainer = Trainer(
+            model=model,
+            dataloader=train_loader,
+            config=config
+        )
+
+        # Train the model
+        # trainer.train(val_loader)
+        val_loss, val_metrics = trainer.validate_epoch(val_loader=male_test_loader)
+        val_loss, val_metrics = trainer.validate_epoch(val_loader=female_test_loader)
+        # male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+        # male_monte_carlo.run_predictions()
 
         print('Female test')
-        female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
-        female_monte_carlo.run_predictions()
+        # female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+        # female_monte_carlo.run_predictions()
 
