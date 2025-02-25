@@ -468,7 +468,7 @@ class MonteCarloPredictionRegression:
             y_pred_all.append(y_pred_mean)
             epistemic_all.append(epi_unc)
             aleatoric_all.append(alea_unc)
-            print(f"All batch dimension of the testing set {y_true_all.shape}{y_pred_all.shape}{epistemic_all.shape}{aleatoric_all.shape}")
+            print(f"All batch dimension of the testing set {len(y_true_all)}{len(y_pred_all)}{len(epistemic_all)}{len(aleatoric_all)}")
 
         # Concatenate results from all batches.
         y_true_all = np.concatenate(y_true_all, axis=0)
