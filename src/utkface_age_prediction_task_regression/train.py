@@ -12,6 +12,32 @@ print("Project root added to sys.path:", project_root)
 
 from src.models.base_model import BaseModel
 
+def mse_loss(y_pred, y_true):
+    loss = 0.5 * (y_true - y_pred) ** 2
+    return loss.mean()
+
+def heteroscedastic_loss(y_pred, y_true, log_var):
+    """
+    Computes the heteroscedastic regression loss.
+
+    Args:
+        y_pred (Tensor): Predicted values (shape: [batch_size, 1]).
+        y_true (Tensor): Ground truth values (shape: [batch_size, 1]).
+        log_var (Tensor): Predicted log variance (shape: [batch_size, 1]).
+
+    Returns:
+        Tensor: The computed loss (a scalar).
+    """
+    # Compute the precision as the exponential of the negative log variance.
+    # precision = torch.exp(-log_var)
+    
+    # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
+    # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
+    loss = 0.5 * (y_true - y_pred) ** 2
+    
+    # Return the mean loss over the batch.
+    return loss.mean()
+
 class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)
     def __init__(self, task='regression', drop_rate=0.50, hidden_layer=128):
         super(UTKFaceAgeModel, self).__init__(model_name="UTKFaceAgeModel")
@@ -42,13 +68,13 @@ class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)
             self.age_head = nn.Linear(self.hidden_layer, 1)
             self.log_var_head = nn.Linear(self.hidden_layer, 1)
         
-        elif self.task == 'classification':
-            # Classification: Predict class logits and a log variance for each class.
-            # Assumes self.num_classes is defined in BaseModel.
-            self.logit_head = nn.Linear(self.hidden_layer, self.num_classes)
-            self.log_var_head = nn.Linear(self.hidden_layer, self.num_classes)
-        else:
-            raise ValueError("Task must be either 'regression' or 'classification'.")
+        # elif self.task == 'classification':
+        #     # Classification: Predict class logits and a log variance for each class.
+        #     # Assumes self.num_classes is defined in BaseModel.
+        #     self.logit_head = nn.Linear(self.hidden_layer, self.num_classes)
+        #     self.log_var_head = nn.Linear(self.hidden_layer, self.num_classes)
+        # else:
+        #     raise ValueError("Task must be either 'regression' or 'classification'.")
         
         
     def forward(self, images):
@@ -256,7 +282,7 @@ from src.utils.results_writer import MetricsTracker
 from src.utils.losses import BNN_BCEWithLogitsLoss, BNN_CrossEntropyLoss
 from tqdm import tqdm
 
-from src.utils.losses import heteroscedastic_loss
+# from src.utils.losses import heteroscedastic_loss
 
 class Trainer:
     def __init__(self, model, dataloader, config):
@@ -280,6 +306,15 @@ class Trainer:
         self.evaluation_metrics = MultiLabelEvaluator(eval_type="mae")
         self.log_file_path = FilenameManager().get_filename('training_log')
         self.results_writer = MetricsTracker(self.log_file_path)
+
+        self.print_params()
+    
+    def print_params(self):
+        print(f"Learning Rate: {self.learning_rate}\nOptimizer: {self.optimizer_config}")
+        print(f"num_samples: {self.num_samples}")
+        print(f"num_epochs: {self.num_epochs}")
+        print(f"device: {self.device}")
+        print(f"log_file_path: {self.log_file_path}")
 
     def _initialize_optimizer(self):
         if self.optimizer_config == "adam":
@@ -385,6 +420,7 @@ class Trainer:
         self.evaluation_metrics.reset_metrics()
 
         return epoch_loss, epoch_metrics
+
 
 
 import numpy as np
