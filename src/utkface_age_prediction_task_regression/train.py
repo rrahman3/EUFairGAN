@@ -588,8 +588,12 @@ if __name__ == "__main__":
 
         # Train the model
         # trainer.train(val_loader)
-        val_loss, val_metrics = trainer.validate_epoch(val_loader=male_test_loader)
-        val_loss, val_metrics = trainer.validate_epoch(val_loader=female_test_loader)
+        for _ in range(10):
+            print(f"inference stage {_}")
+            print("male")
+            val_loss, val_metrics = trainer.validate_epoch(val_loader=male_test_loader)
+            print("female")
+            val_loss, val_metrics = trainer.validate_epoch(val_loader=female_test_loader)
         # male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
         # male_monte_carlo.run_predictions()
 
