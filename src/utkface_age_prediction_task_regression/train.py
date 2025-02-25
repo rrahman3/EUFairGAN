@@ -464,6 +464,7 @@ class Trainer:
             images, y = images.to(self.device), y.to(self.device)
             if epoch == 1 and batch == 0:
                 print(f'{images.shape}, {y.shape}')
+                print(y)
 
             self.model.train()
             self.optimizer.zero_grad()
