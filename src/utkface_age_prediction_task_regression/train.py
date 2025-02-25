@@ -38,12 +38,106 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
     # Return the mean loss over the batch.
     return loss.mean()
 
+class ResidualBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1, drop_rate=0.5):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3,
+                               stride=stride, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3,
+                               stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.dropout = nn.Dropout(p=drop_rate) if drop_rate > 0 else None
+
+        # If the input and output dimensions differ, or if stride is not 1, use a projection.
+        self.downsample = None
+        if stride != 1 or in_channels != out_channels:
+            self.downsample = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1,
+                          stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels)
+            )
+            
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        if self.dropout is not None:
+            out = self.dropout(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+        out += identity
+        out = self.relu(out)
+        return out
+
+class UTKFaceResidualBlockAgeModel(BaseModel):
+    def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128):
+        super(UTKFaceResidualBlockAgeModel, self).__init__(model_name="UTKFace ResidualBlock Age Model")
+        self.task = task
+        self.hidden_layer = hidden_layer
+
+        # Replace the original CNN blocks with residual blocks.
+        # Here we use three residual blocks. The first block keeps the spatial dimensions,
+        # and the next two downsample by a factor of 2.
+        self.resblock1 = ResidualBlock(in_channels=3, out_channels=32, stride=1, drop_rate=drop_rate)
+        self.resblock2 = ResidualBlock(in_channels=32, out_channels=64, stride=2, drop_rate=drop_rate)
+        self.resblock3 = ResidualBlock(in_channels=64, out_channels=128, stride=2, drop_rate=drop_rate)
+
+        # Global average pooling to reduce the spatial dimensions.
+        self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.flatten = nn.Flatten()
+        self.dropout = nn.Dropout(p=drop_rate)
+        
+        # Shared dense layer.
+        self.dense_1 = nn.Linear(128, hidden_layer)
+        
+        # For regression, predict a scalar age and a corresponding log variance.
+        self.age_head = nn.Linear(hidden_layer, 1)
+        self.log_var_head = nn.Linear(hidden_layer, 1)
+
+    def forward(self, images, genders=None, mc_samples=1):
+        """
+        Forward pass for both regression and classification.
+        
+        Args:
+            images (Tensor): Input images of shape (batch, 3, H, W).
+            genders (Tensor, optional): Not used in this example.
+            mc_samples (int): Number of Monte Carlo samples (only used in classification).
+        
+        Returns:
+            For regression:
+                (age, log_var) — both of shape (batch, 1)
+            For classification:
+                Tensor of shape (mc_samples, batch, num_classes) containing MC-sampled logits.
+        """
+        x = self.resblock1(images)
+        x = self.resblock2(x)
+        x = self.resblock3(x)
+        
+        # Global average pooling reduces feature maps to size (batch, 128, 1, 1)
+        x = self.global_avg_pool(x)
+        x = self.flatten(x)  # Now shape is (batch, 128)
+        x = self.dropout(x)
+        x = self.dense_1(x)
+
+        age = self.age_head(x)
+        log_var = self.log_var_head(x)
+        # Optionally, apply softplus to log_var for stability: log_var = F.softplus(log_var)
+        return age, log_var
+
+        
 class UTKFaceAgeModel(BaseModel): #input shape (None, 3, Px, Py)
     def __init__(self, task='regression', drop_rate=0.50, hidden_layer=128):
         super(UTKFaceAgeModel, self).__init__(model_name="UTKFaceAgeModel")
         self.task = task
         self.hidden_layer = hidden_layer
-
+        
         self.conv_1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3)
         self.relu_1 = nn.ReLU()
         self.max_pool_1 = nn.MaxPool2d(kernel_size=2)
@@ -339,11 +433,10 @@ class Trainer:
 
         for epoch in range(1, self.num_epochs+1):
             print(f"Epoch [{epoch}/{self.num_epochs}]")
-
+            print(f"----------------Train Epoch {epoch}----------------")
             train_loss, train_metrics = self.train_epoch(epoch=epoch)
+            print(f"----------------Validation Epoch {epoch}----------------")
             val_loss, val_metrics = self.validate_epoch(val_loader=val_loader)
-            val_loss, val_metrics = self.validate_epoch(val_loader=male_test_loader)
-            val_loss, val_metrics = self.validate_epoch(val_loader=female_test_loader)
 
             model_saved_path = FilenameManager().generate_model_filename(epoch=epoch, learning_rate=self.learning_rate, extension='pth')            
             self.model.save_model(model_saved_path)
@@ -351,6 +444,8 @@ class Trainer:
             self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
             self.results_writer.save()
             print('Male test')
+
+            N_MonteCarloSimulation = 10
             male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
             male_monte_carlo.run_predictions()
 
@@ -587,10 +682,10 @@ if __name__ == "__main__":
     male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
-    model = UTKFaceAgeModel(task='regression', drop_rate=0.5, hidden_layer=128)
-    model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
+    model = UTKFaceResidualBlockAgeModel(task='regression', drop_rate=0.5, hidden_layer=128)
+    # model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
     # task_config['bnn_model_location']
-    model.load_model(model_saved_location) 
+    # model.load_model(model_saved_location) 
     # model = model_factory(model_name=model_name, models_config=models_config)
     print(model)
 
