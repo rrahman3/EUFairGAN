@@ -780,7 +780,7 @@ class MonteCarloPredictionRegression:
 
 import pandas as pd
 def write_to_csv(data_lists, column_names=None, model_name=None, dataset_name=None):
-    filename = f"outputs/evaluation_results/{FilenameManager().get_updated_filename(model_name=None, dataset_name=None)}"
+    filename = f"outputs/evaluation_results/{FilenameManager().get_updated_filename(model_name, dataset_name)}"
     df = pd.DataFrame({name: data for name, data in zip(column_names, data_lists)})
     
     # Write to CSV
@@ -908,7 +908,15 @@ if __name__ == "__main__":
         ### ResNet152
         elif test_model == "resnet101":
             model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+
+            # mse and mae loss
             model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000328/models/model_weights_epoch_50_lr_0.001_20250227_000328.pth"
+
+            # use exp(-log_var)
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_160842/models/model_weights_epoch_50_lr_0.001_20250227_160842.pth"
+
+            # use exp(log_var)
+            # model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_160105/models/model_weights_epoch_50_lr_0.001_20250227_160105.pth"
 
         ### ResNet152
         elif test_model == "resnet50":
@@ -946,5 +954,5 @@ if __name__ == "__main__":
         data_lists.append(mae_males)
         data_lists.append(mae_females)
     
-        write_to_csv(data_lists, column_names=["Male", "Female"], model_name=test_model, dataset_name="UTKFace")
+        write_to_csv(data_lists, column_names=["Male", "Female"], model_name=test_model+"neg_var", dataset_name="UTKFace")
 
