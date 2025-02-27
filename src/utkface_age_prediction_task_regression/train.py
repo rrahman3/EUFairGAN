@@ -39,6 +39,51 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
     # Return the mean loss over the batch.
     return loss.mean()
 
+
+
+import torch
+import torch.nn as nn
+import torchvision.models as models
+from torchvision.models import ViT_B_16_Weights, ViT_L_16_Weights
+
+class ViT_AgeRegressionModel(BaseModel):
+    def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
+        super(ViT_AgeRegressionModel, self).__init__(model_name="ViT Age Regression Model")
+
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        self.model = models.vit_b_16(weights=ViT_B_16_Weights.DEFAULT)
+        # elif vit_version == "vit_l_16":
+        #     self.model = models.vit_l_16(weights=ViT_L_16_Weights.DEFAULT)
+        # else:
+        #     raise ValueError("Invalid ViT version. Choose 'vit_b_16' or 'vit_l_16'.")
+
+        in_features = self.model.heads.head.in_features
+        
+        self.model.heads.head = nn.Sequential(
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(p=drop_rate)
+        )
+
+        self.age_head = nn.Linear(512, 1)
+        self.log_var_head = nn.Linear(512, 1)
+
+        self.to(self.device)
+
+    def forward(self, x):
+        x = x.to(self.device)  # Ensure input tensor is on the correct device
+        features = self.model(x)
+        age = self.age_head(features)
+        log_var = self.log_var_head(features)
+        return age, log_var
+    
+    def save_model(self, model_saved_path):
+        torch.save(self.state_dict(), model_saved_path)
+
+
+
+
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, drop_rate=0.5):
         super(ResidualBlock, self).__init__()
@@ -802,8 +847,10 @@ if __name__ == "__main__":
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
     # model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
-    model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    # model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
     # model = ResNet152_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    model = ViT_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    
     print(f"f########################################{model.model_name}########################################")
     print(f"f########################################{model.model_name}########################################")
     print(f"f########################################{model.model_name}########################################")
