@@ -323,9 +323,9 @@ class MultiLabelEvaluator:
         metrics = {}
 
         if self.eval_type == "mae":
-            # Compute Mean Absolute Error treating predictions as continuous.
+            # Compute Mean Absolute Error treating predictions as continuous.            
             mae = mean_absolute_error(y_true, y_score)
-            metrics["mae"] = mae
+            metrics["mae"] = train_loader.get_actual_age(mae)
 
         else:
             # For classification tasks, first apply threshold to get binary predictions.
@@ -642,6 +642,7 @@ class MonteCarloPredictionRegression:
         print(f"Dimension of the testing set {y_true_all.shape}{y_pred_all.shape}{epistemic_all.shape}{aleatoric_all.shape}")
         # Compute evaluation metric: MAE.
         mae = mean_absolute_error(y_true_all, y_pred_all)
+        mae = train_loader.get_actual_age(mae)
         print(f"MAE: {mae:.4f}")
 
         # Compute average uncertainties.
