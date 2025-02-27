@@ -81,6 +81,60 @@ class ResidualBlock(nn.Module):
 import torchvision.models as models
 from src.models.base_model import BaseModel
 
+class ResNet152_AgeRegressionModel(BaseModel):
+    def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
+        super(ResNet152_AgeRegressionModel, self).__init__(model_name="ResNet152 Age Regression Model")
+        
+        self.model = models.resnet152(pretrained=pretrained)
+        in_features = self.model.fc.in_features
+        
+        # Replace the fully connected layer with a shared feature extractor
+        self.model.fc = nn.Sequential(
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(p=drop_rate)
+        )
+        
+        # Define age and log variance heads
+        self.age_head = nn.Linear(512, 1)
+        self.log_var_head = nn.Linear(512, 1)
+
+    def forward(self, x):
+        features = self.model(x)
+        age = self.age_head(features)
+        log_var = self.log_var_head(features)
+        return age, log_var
+    
+    def save_model(self, model_saved_path):
+        torch.save(self.state_dict(), model_saved_path)
+
+class ResNet101_AgeRegressionModel(BaseModel):
+    def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
+        super(ResNet101_AgeRegressionModel, self).__init__(model_name="ResNet101 Age Regression Model")
+        
+        self.model = models.resnet101(pretrained=pretrained)
+        in_features = self.model.fc.in_features
+        
+        # Replace the fully connected layer with a shared feature extractor
+        self.model.fc = nn.Sequential(
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(p=drop_rate)
+        )
+        
+        # Define age and log variance heads
+        self.age_head = nn.Linear(512, 1)
+        self.log_var_head = nn.Linear(512, 1)
+
+    def forward(self, x):
+        features = self.model(x)
+        age = self.age_head(features)
+        log_var = self.log_var_head(features)
+        return age, log_var
+    
+    def save_model(self, model_saved_path):
+        torch.save(self.state_dict(), model_saved_path)
+
 class ResNet50_AgeRegressionModel(BaseModel):
     def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
         super(ResNet50_AgeRegressionModel, self).__init__(model_name="ResNet50 Age Regression Model")
@@ -476,15 +530,16 @@ class Trainer:
 
             self.results_writer.update(epoch=epoch, batch=None, train_loss=train_loss, val_loss=val_loss, train_metrics=train_metrics, val_metrics=val_metrics)
             self.results_writer.save()
-            print('Male test')
 
-            N_MonteCarloSimulation = 10
-            male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
-            male_monte_carlo.run_predictions()
+            # print('Male test')
 
-            print('Female test')
-            female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
-            female_monte_carlo.run_predictions()
+            # N_MonteCarloSimulation = 10
+            # male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+            # male_monte_carlo.run_predictions()
+
+            # print('Female test')
+            # female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+            # female_monte_carlo.run_predictions()
 
 
     def train_epoch(self, epoch):
@@ -720,7 +775,13 @@ if __name__ == "__main__":
     male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
-    model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    # model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    # model = ResNet152_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    print(f"f########################################{model.model_name}########################################")
+    print(f"f########################################{model.model_name}########################################")
+    print(f"f########################################{model.model_name}########################################")
+
     # model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
     # task_config['bnn_model_location']
     # model.load_model(model_saved_location) 
