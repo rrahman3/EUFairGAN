@@ -80,12 +80,14 @@ class ResidualBlock(nn.Module):
 
 import torchvision.models as models
 from src.models.base_model import BaseModel
+from torchvision.models import ResNet101_Weights, ResNet152_Weights, ResNet50_Weights
 
 class ResNet152_AgeRegressionModel(BaseModel):
     def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
         super(ResNet152_AgeRegressionModel, self).__init__(model_name="ResNet152 Age Regression Model")
         
-        self.model = models.resnet152(pretrained=pretrained)
+        self.model = models.resnet152(weights=ResNet152_Weights.DEFAULT)
+        
         in_features = self.model.fc.in_features
         
         # Replace the fully connected layer with a shared feature extractor
@@ -112,7 +114,7 @@ class ResNet101_AgeRegressionModel(BaseModel):
     def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
         super(ResNet101_AgeRegressionModel, self).__init__(model_name="ResNet101 Age Regression Model")
         
-        self.model = models.resnet101(pretrained=pretrained)
+        self.model = models.resnet101(weights=ResNet101_Weights.DEFAULT)
         in_features = self.model.fc.in_features
         
         # Replace the fully connected layer with a shared feature extractor
@@ -138,7 +140,7 @@ class ResNet101_AgeRegressionModel(BaseModel):
 class ResNet50_AgeRegressionModel(BaseModel):
     def __init__(self, task='regression', drop_rate=0.5, hidden_layer=128, pretrained=True):
         super(ResNet50_AgeRegressionModel, self).__init__(model_name="ResNet50 Age Regression Model")
-        self.model = models.resnet50(pretrained=pretrained)
+        self.model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
         in_features = self.model.fc.in_features
         
         # Replace the original fully connected layer with a shared feature extractor.
@@ -831,11 +833,11 @@ if __name__ == "__main__":
         data_lists = []
         mae_males = []
         mae_females = []
-        test_model = "resnet152"
+        test_model = "resnet101"
         print(f"test model name {test_model}")
         if test_model == "resnet152":
             model = ResNet152_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
-            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000628/models/model_weights_epoch_50_lr_0.005_20250227_000628.pth"
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000628/models/model_weights_epoch_50_lr_0.001_20250227_000628.pth"
 
         ### ResNet152
         elif test_model == "resnet101":
@@ -859,6 +861,7 @@ if __name__ == "__main__":
         # task_config['bnn_model_location']
 
         for i in range(10):
+            N_MonteCarloSimulation = 10
             model.load_model(model_saved_location)        
             model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
             # task_config = config[task_name][task_config_name]
@@ -871,7 +874,7 @@ if __name__ == "__main__":
             female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
             mae_female, _, _ = female_monte_carlo.run_predictions()
 
-            mae_males.append(mae_male)9
+            mae_males.append(mae_male)
             mae_females.append(mae_female)
         
         data_lists.append(mae_males)
