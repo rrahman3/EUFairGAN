@@ -711,6 +711,30 @@ class MonteCarloPredictionRegression:
 
         # return y_true_all, y_pred_all, aleatoric_all, epistemic_all
 
+
+import pandas as pd
+def write_to_csv(data_lists, column_names=None, model_name=None, dataset_name=None):
+    filename = f"outputs/evaluation_results/{FilenameManager().get_updated_filename(model_name=None, dataset_name=None)}"
+    df = pd.DataFrame({name: data for name, data in zip(column_names, data_lists)})
+    
+    # Write to CSV
+    df.to_csv(filename, index=False)
+
+import numpy as np
+import scipy.stats as stats
+
+def perform_t_test(sample1, sample2, paired=False, equal_var=True):
+    sample1 = np.array(sample1)
+    sample2 = np.array(sample2)
+
+    if paired:
+        t_stat, p_value = stats.ttest_rel(sample1, sample2)
+    else:
+        t_stat, p_value = stats.ttest_ind(sample1, sample2, equal_var=equal_var)
+
+    return t_stat, p_value
+
+
 # Example usage:
 # Assuming `model_reg` is your trained heteroscedastic regression model,
 # and `test_loader` is your test DataLoader.
@@ -804,33 +828,54 @@ if __name__ == "__main__":
         trainer.train(val_loader)
 
     elif task_name == 'test_bnn':
-        # task_config = config[task_name][task_config_name]
-        # print(task_config)
+        data_lists = []
+        mae_males = []
+        mae_females = []
+        test_model = "resnet152"
+        print(f"test model name {test_model}")
+        if test_model == "resnet152":
+            model = ResNet152_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000628/models/model_weights_epoch_50_lr_0.005_20250227_000628.pth"
 
-        model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
+        ### ResNet152
+        elif test_model == "resnet101":
+            model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000328/models/model_weights_epoch_50_lr_0.005_20250227_000328.pth"
+
+        ### ResNet152
+        elif test_model == "resnet50":
+            #alpha = .7
+            model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250226_223327/models/model_weights_epoch_50_lr_0.005_20250226_223327.pth"
+
+            #alpha = .3
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250226_225627/models/model_weights_epoch_50_lr_0.001_20250226_225627.pth"
+
+        ### ResNet152
+        else:
+            model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
+
         # task_config['bnn_model_location']
-        model.load_model(model_saved_location)        
-        model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
-        print('Male test')
-        # trainer = Trainer(
-        #     model=model,
-        #     dataloader=train_loader,
-        #     config=config
-        # )
+        for i in range(10):
+            model.load_model(model_saved_location)        
+            model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+            # task_config = config[task_name][task_config_name]
+            # print(task_config)
+            print('Male test')
+            male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+            mae_male, _, _ = male_monte_carlo.run_predictions()
 
-        # Train the model
-        # trainer.train(val_loader)
-        # for _ in range(10):
-        #     print(f"inference stage {_}")
-        #     print("male")
-        #     val_loss, val_metrics = trainer.validate_epoch(val_loader=male_test_loader)
-        #     print("female")
-        #     val_loss, val_metrics = trainer.validate_epoch(val_loader=female_test_loader)
-        male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
-        male_monte_carlo.run_predictions()
+            print('Female test')
+            female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+            mae_female, _, _ = female_monte_carlo.run_predictions()
 
-        print('Female test')
-        female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
-        female_monte_carlo.run_predictions()
+            mae_males.append(mae_male)9
+            mae_females.append(mae_female)
+        
+        data_lists.append(mae_males)
+        data_lists.append(mae_females)
+    
+        write_to_csv(data_lists, column_names=["Male", "Female"], model_name=test_model, dataset_name="UTKFace")
 

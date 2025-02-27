@@ -23,7 +23,10 @@ class FilenameManager:
             os.makedirs(f"outputs/{cls._instance.base_folder}/images/", exist_ok=True)
             os.makedirs(f"outputs/{cls._instance.base_folder}/models/", exist_ok=True)
         return cls._instance
-
+    
+    def get_base_folder(self):
+        return self.base_folder
+    
     def get_filename(self, key: str) -> str:
         """Get the filename associated with the given key."""
         return self.filenames.get(key, None)
@@ -57,3 +60,6 @@ class FilenameManager:
 
         filename += f"_{self.timestamp}.{extension}"
         return filename
+    
+    def get_updated_filename(self, model_name=None, dataset_name=None, task_name=None):
+        return f"{task_name}_{model_name}_{dataset_name}_{self._instance.timestamp}.csv"
