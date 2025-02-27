@@ -16,7 +16,7 @@ def mse_loss(y_pred, y_true):
     loss = 0.5 * (y_true - y_pred) ** 2
     return loss.mean()
 
-alpha = 0.3
+alpha = 0.5
 def heteroscedastic_loss(y_pred, y_true, log_var):
     """
     Computes the heteroscedastic regression loss.
@@ -30,11 +30,12 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
         Tensor: The computed loss (a scalar).
     """
     # Compute the precision as the exponential of the negative log variance.
-    precision = torch.exp(-log_var)
+    # precision = torch.exp(-log_var)
     
     # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
-    loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
+    # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
     # loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * torch.abs(y_true - y_pred)
+    loss = alpha * (y_true - y_pred) ** 2
     
     # Return the mean loss over the batch.
     return loss.mean()
