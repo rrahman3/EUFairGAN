@@ -33,6 +33,7 @@ class UTKFaceDataset(Dataset):
             gender = np.array([self.metadata.Gender[idx]]).astype(np.float32)
             race =  np.array([self.metadata.Race[idx]]).astype(np.float32)
             age_regression = np.array([self.metadata.Age[idx]]).astype(np.float32)
+            age_normalized = np.array([self.metadata.Age_Normalized[idx]]).astype(np.float32)
             age_classification = np.eye(3)[self._convert_age_for_classification(self.metadata.Age[idx])].reshape(-1).astype(np.float32)
             
             sample = {
@@ -42,13 +43,14 @@ class UTKFaceDataset(Dataset):
                         'gender': gender, 
                         'race': race, 
                         'age_classification': age_classification, 
-                        'age_regression': age_regression
+                        'age_regression': age_regression,
+                        'age_normalized': age_normalized,
                     }
             
             # return sample['lr_image'], sample['hr_image'], sample['gender'], sample['age_classification']
             if self.task == 2:
-                return sample['lr_image'], sample['age_regression']
-            return sample['lr_image'], sample['gender'], sample['age_regression']
+                return sample['lr_image'], sample['age_normalized']
+            return sample['lr_image'], sample['gender'], sample['age_classification']
         
         except KeyError as e:
             print(idx)
@@ -76,6 +78,9 @@ class UTKFaceDataset(Dataset):
         temp = temp.transpose((2, 0, 1))
         temp = torch.tensor(np.array(temp)).float()
         return temp
+    
+    def get_actual_age(self, y):
+        return (y * (self.age_max - self.age_min)) + self.age_min 
 
     def _process_csv(self):
         metadata = pd.read_csv(self.metadata_file, nrows=None)
@@ -88,6 +93,11 @@ class UTKFaceDataset(Dataset):
         metadata.dropna(subset=['Age', 'Gender', 'Race', 'image'], inplace=True)
         metadata.drop(columns=['image'], inplace=True)
         metadata['Age'] = metadata['Age'].astype(int)
+
+        self.age_min = metadata['Age'].min()  # Should be 1
+        self.age_max = metadata['Age'].max()  # Should be 116
+        metadata['Age_Normalized'] = (metadata['Age'] - self.age_min) / (self.age_max - self.age_min)
+
         metadata['Gender'] = metadata['Gender'].astype(int)
         metadata['Race'] = metadata['Race'].astype(int)
         print(len(metadata))
