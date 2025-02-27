@@ -194,7 +194,7 @@ class ResNet101_AgeRegressionModel(BaseModel):
     def forward(self, x):
         features = self.model(x)
         age = self.age_head(features)
-        log_var = self.log_var_head(features)
+        log_var = F.softplus(self.log_var_head(features))
         return age, log_var
     
     def save_model(self, model_saved_path):
