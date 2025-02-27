@@ -16,6 +16,7 @@ def mse_loss(y_pred, y_true):
     loss = 0.5 * (y_true - y_pred) ** 2
     return loss.mean()
 
+alpha = 0.7
 def heteroscedastic_loss(y_pred, y_true, log_var):
     """
     Computes the heteroscedastic regression loss.
@@ -33,7 +34,7 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
     
     # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
     # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
-    loss = (y_true - y_pred) ** 2 
+    loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * abs(y_true - y_pred)
     
     # Return the mean loss over the batch.
     return loss.mean()
@@ -716,7 +717,7 @@ if __name__ == "__main__":
     male_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=0)
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
-    model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.5, hidden_layer=128)
+    model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
     # model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250224_121334/models/model_weights_epoch_50_lr_0.005_20250224_121334.pth"
     # task_config['bnn_model_location']
     # model.load_model(model_saved_location) 
