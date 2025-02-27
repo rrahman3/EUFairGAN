@@ -59,7 +59,7 @@ class ViT_AgeRegressionModel(BaseModel):
         #     raise ValueError("Invalid ViT version. Choose 'vit_b_16' or 'vit_l_16'.")
         
         self._modify_patch_embedding()
-        
+
         in_features = self.model.heads.head.in_features
         
         self.model.heads.head = nn.Sequential(
@@ -84,20 +84,20 @@ class ViT_AgeRegressionModel(BaseModel):
         torch.save(self.state_dict(), model_saved_path)
 
     def _modify_patch_embedding(self):
-        """ Modify the patch embedding layer to support 128x128 input size """
-        patch_size = self.model.patch_embed.proj.kernel_size[0]  # Extract original patch size
+        """ Modify the patch embedding layer to support 128x128 input """
+        patch_size = self.model.conv_proj.kernel_size[0]  # Extract original patch size
         new_num_patches = (128 // patch_size) * (128 // patch_size)  # Compute new num_patches
 
-        # Update positional embedding
-        self.model.patch_embed.proj = nn.Conv2d(
+        # Update positional embedding size
+        self.model.conv_proj = nn.Conv2d(
             in_channels=3,  # Keep same number of channels
             out_channels=self.model.hidden_dim,  
             kernel_size=patch_size,  
             stride=patch_size  
         )
 
-        # Adjust positional embedding size
-        self.model.pos_embedding = nn.Parameter(
+        # Adjust positional embedding
+        self.model.encoder.pos_embedding = nn.Parameter(
             torch.zeros(1, new_num_patches + 1, self.model.hidden_dim)
         )
 
