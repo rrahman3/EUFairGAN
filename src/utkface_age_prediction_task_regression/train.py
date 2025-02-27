@@ -30,11 +30,11 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
         Tensor: The computed loss (a scalar).
     """
     # Compute the precision as the exponential of the negative log variance.
-    # precision = torch.exp(-log_var)
+    precision = torch.exp(-log_var)
     
     # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
-    # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
-    loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * torch.abs(y_true - y_pred)
+    loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
+    # loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * torch.abs(y_true - y_pred)
     
     # Return the mean loss over the batch.
     return loss.mean()
@@ -865,9 +865,9 @@ if __name__ == "__main__":
     female_test_loader = dataloader_factory(dataset_name, 'test', dataset_info, group=1)
     print("Model Config", models_config)
     # model = ResNet50_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
-    # model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
     # model = ResNet152_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
-    model = ViT_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+    # model = ViT_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
     
     print(f"f########################################{model.model_name}########################################")
     print(f"f########################################{model.model_name}########################################")
