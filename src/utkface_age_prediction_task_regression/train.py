@@ -34,7 +34,7 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
     
     # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
     # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
-    loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * abs(y_true - y_pred)
+    loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * torch.abs(y_true - y_pred)
     
     # Return the mean loss over the batch.
     return loss.mean()
@@ -326,7 +326,7 @@ class MultiLabelEvaluator:
         if self.eval_type == "mae":
             # Compute Mean Absolute Error treating predictions as continuous.            
             mae = mean_absolute_error(y_true, y_score)
-            metrics["mae"] = train_loader.get_actual_age(mae)
+            metrics["mae"] = utkface_dataset.get_actual_age(mae)
 
         else:
             # For classification tasks, first apply threshold to get binary predictions.
@@ -643,7 +643,7 @@ class MonteCarloPredictionRegression:
         print(f"Dimension of the testing set {y_true_all.shape}{y_pred_all.shape}{epistemic_all.shape}{aleatoric_all.shape}")
         # Compute evaluation metric: MAE.
         mae = mean_absolute_error(y_true_all, y_pred_all)
-        mae = train_loader.get_actual_age(mae)
+        mae = utkface_dataset.get_actual_age(mae)
         print(f"MAE: {mae:.4f}")
 
         # Compute average uncertainties.
@@ -710,6 +710,7 @@ if __name__ == "__main__":
     if dataset_info is None:
         raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
     
+    utkface_dataset = dataloader_factory.dataset_factory(dataset_name, split="train", config=None, group=None)
     # Create the DataLoaders for train, validation, and test splits
     train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
     val_loader = dataloader_factory(dataset_name, 'val', dataset_info)

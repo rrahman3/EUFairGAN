@@ -10,6 +10,17 @@ def collate_fn(batch):
     batch = [item for item in batch if item[0] is not None]
     return torch.utils.data.dataloader.default_collate(batch)
 
+def dataset_factory(dataset_name, split="train", config=None, group=None): #group nust be 'male/female, black/white
+        if dataset_name == "UTKFace":
+            dataset = UTKFaceDataset(
+                metadata_file=config[split]['metadata_file'],
+                image_dir=config[split]['img_dir'],
+                image_dim=eval(config[split]['img_dim']),
+                frac=config[split]['frac'],
+                task = 2
+            )
+            return dataset
+
 def dataloader_factory(dataset_name, split, config, group=None): #group nust be 'male/female, black/white
     if dataset_name == "UTKFace":
         dataset = UTKFaceDataset(
