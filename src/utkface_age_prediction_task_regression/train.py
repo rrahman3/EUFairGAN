@@ -712,7 +712,7 @@ if __name__ == "__main__":
         raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
     
     
-    utkface_dataset = dataset_factory(dataset_name, split="train", config=None, group=None)
+    utkface_dataset = dataset_factory(dataset_name="UTKFace", split="train", config=dataset_info, group=None)
     # Create the DataLoaders for train, validation, and test splits
     train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
     val_loader = dataloader_factory(dataset_name, 'val', dataset_info)
