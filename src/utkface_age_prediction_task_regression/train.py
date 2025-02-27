@@ -16,7 +16,7 @@ def mse_loss(y_pred, y_true):
     loss = 0.5 * (y_true - y_pred) ** 2
     return loss.mean()
 
-alpha = 0.7
+alpha = 0.3
 def heteroscedastic_loss(y_pred, y_true, log_var):
     """
     Computes the heteroscedastic regression loss.
