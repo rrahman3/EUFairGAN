@@ -664,6 +664,7 @@ class MonteCarloPredictionRegression:
 
 from src.utils.config_reader import ConfigReader
 from src.dataloader.dataloader_factory import dataloader_factory
+from src.dataloader.dataloader_factory import dataset_factory
 from src.models.model_factory import model_factory
 from src.evaluations.monte_carlo import MonteCarloPrediction
 
@@ -710,7 +711,8 @@ if __name__ == "__main__":
     if dataset_info is None:
         raise ValueError(f"Dataset '{dataset_name}' not found in configuration.")
     
-    utkface_dataset = dataloader_factory.dataset_factory(dataset_name, split="train", config=None, group=None)
+    
+    utkface_dataset = dataset_factory(dataset_name, split="train", config=None, group=None)
     # Create the DataLoaders for train, validation, and test splits
     train_loader = dataloader_factory(dataset_name, 'train', dataset_info)
     val_loader = dataloader_factory(dataset_name, 'val', dataset_info)
