@@ -842,7 +842,7 @@ if __name__ == "__main__":
         ### ResNet152
         elif test_model == "resnet101":
             model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
-            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000328/models/model_weights_epoch_50_lr_0.005_20250227_000328.pth"
+            model_saved_location = "outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250227_000328/models/model_weights_epoch_50_lr_0.001_20250227_000328.pth"
 
         ### ResNet152
         elif test_model == "resnet50":
