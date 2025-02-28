@@ -801,6 +801,40 @@ def perform_t_test(sample1, sample2, paired=False, equal_var=True):
 
     return t_stat, p_value
 
+def test_model_evaluation(model_saved_location, test_model):
+    data_lists = []
+    mae_males = []
+    mae_females = []
+    male_avg_aleas = []
+    female_avg_aleas = []
+
+    model = ResNet101_AgeRegressionModel(task='regression', drop_rate=0.25, hidden_layer=128)
+
+    for i in range(10):
+        N_MonteCarloSimulation = 10
+        model.load_model(model_saved_location)        
+        model = model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+        print('Male test')
+        male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
+        mae_male, male_avg_alea, _ = male_monte_carlo.run_predictions()
+
+        print('Female test')
+        female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
+        mae_female, female_avg_alea, _ = female_monte_carlo.run_predictions()
+
+        mae_males.append(mae_male)
+        mae_females.append(mae_female)
+        male_avg_aleas.append(male_avg_alea)
+        female_avg_aleas.append(female_avg_alea)
+    
+    data_lists.append(mae_males)
+    data_lists.append(mae_females)
+    data_lists.append(male_avg_aleas)
+    data_lists.append(female_avg_aleas)
+
+
+    write_to_csv(data_lists, column_names=["Male_MAE", "Female_MAE", "Male_AU", "Female_AU"], model_name=test_model, dataset_name="UTKFace")
 
 # Example usage:
 # Assuming `model_reg` is your trained heteroscedastic regression model,
@@ -897,6 +931,31 @@ if __name__ == "__main__":
         trainer.train(val_loader)
 
     elif task_name == 'test_bnn':
+        try:
+            test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_070056/models/model_weights_epoch_50_lr_0.001_20250228_070056.pth", test_model='resnet101_l2_loss')
+        except Exception as e:
+            print(f"Error evaluating model resnet101_l2_loss: {e}")
+
+        try:
+            test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_073625/models/model_weights_epoch_50_lr_0.001_20250228_073625.pth", test_model='resnet101_log_var_with_softplus')
+        except Exception as e:
+            print(f"Error evaluating model resnet101_log_var_with_softplus: {e}")
+
+        try:
+            test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_074128/models/model_weights_epoch_50_lr_0.001_20250228_074128.pth", test_model='resnet101_log_var_without_softplus')
+        except Exception as e:
+            print(f"Error evaluating model resnet101_log_var_without_softplus: {e}")
+
+        try:
+            test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_081858/models/model_weights_epoch_50_lr_0.001_20250228_081858.pth", test_model='resnet101_var_with_softplus')
+        except Exception as e:
+            print(f"Error evaluating model resnet101_var_with_softplus: {e}")
+
+        # test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_070056/models/model_weights_epoch_50_lr_0.001_20250228_070056.pth", test_model='resnet101_l2_loss')
+        # test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_073625/models/model_weights_epoch_50_lr_0.001_20250228_073625.pth", test_model='resnet101_log_var_with_softplus')
+        # test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_074128/models/model_weights_epoch_50_lr_0.001_20250228_074128.pth", test_model='resnet101_log_var_without_softplus')
+        # test_model_evaluation(model_saved_location="outputs/train_bnn_UTKFaceAgeModel_UTKFace_20250228_081858/models/model_weights_epoch_50_lr_0.001_20250228_081858.pth", test_model='resnet101_var_with_softplus')
+
         data_lists = []
         mae_males = []
         mae_females = []
@@ -964,4 +1023,6 @@ if __name__ == "__main__":
 
     
         write_to_csv(data_lists, column_names=["Male_MAE", "Female_MAE", "Male_AU", "Female_AU"], model_name=test_model+"neg_var", dataset_name="UTKFace")
+
+
 
