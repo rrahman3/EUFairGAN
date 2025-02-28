@@ -30,12 +30,12 @@ def heteroscedastic_loss(y_pred, y_true, log_var):
         Tensor: The computed loss (a scalar).
     """
     # Compute the precision as the exponential of the negative log variance.
-    # precision = torch.exp(-log_var)
+    precision = torch.exp(-log_var)
     
     # Compute the loss per sample: (1/2) * precision * squared_error + (1/2) * log_var.
-    # loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
+    loss = 0.5 * precision * (y_true - y_pred) ** 2 + 0.5 * log_var
     # loss = alpha * (y_true - y_pred) ** 2 + (1-alpha) * torch.abs(y_true - y_pred)
-    loss = alpha * (y_true - y_pred) ** 2
+    # loss = alpha * (y_true - y_pred) ** 2
     
     # Return the mean loss over the batch.
     return loss.mean()
@@ -510,7 +510,7 @@ class MultiLabelEvaluator:
     def print_metrics(self):
         m = self.epoch_metrics
         if self.eval_type == "mae":
-            print(f"MAE: {m['mae']:.4f}\tAleatoric Uncertainty: {m['aleatoric']:.5f}")
+            print(f"MAE: {m['mae']:.6f}\tAleatoric Uncertainty: {m['aleatoric']}")
         else:
             print(f"ROC AUC: {m.get('auc_roc', 0):.4f}", end='\t')
             print(f"Accuracy: {m.get('accuracy', 0):.4f}", end='\t')
@@ -635,7 +635,7 @@ class Trainer:
             self.evaluation_metrics.update_metrics(batch_y_true=y, batch_y_pred=pred, batch_y_variance=var)
         
         epoch_loss = running_loss / len(self.dataloader)
-        print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.4f}")
+        print(f"Epoch [{epoch}/{self.num_epochs}], Loss: {epoch_loss:.6f}")
         epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
         self.evaluation_metrics.print_metrics()
         self.evaluation_metrics.reset_metrics()
@@ -663,7 +663,7 @@ class Trainer:
 
             
         epoch_loss = running_loss / len(val_loader)
-        print(f"Validation Loss: {epoch_loss:.4f}")
+        print(f"Validation Loss: {epoch_loss:.6f}")
         epoch_metrics = self.evaluation_metrics.compute_epoch_metrics()
         print(f"Validation:\n")
         self.evaluation_metrics.print_metrics()
@@ -765,7 +765,7 @@ class MonteCarloPredictionRegression:
         # Compute evaluation metric: MAE.
         mae = mean_absolute_error(y_true_all, y_pred_all)
         mae = utkface_dataset.get_actual_age(mae)
-        print(f"MAE: {mae:.4f}")
+        print(f"MAE: {mae}")
 
         # Compute average uncertainties.
         avg_epi = np.mean(epistemic_all)
@@ -899,6 +899,9 @@ if __name__ == "__main__":
         data_lists = []
         mae_males = []
         mae_females = []
+        male_avg_aleas = []
+        female_avg_aleas = []
+
         test_model = "resnet101"
         print(f"test model name {test_model}")
         if test_model == "resnet152":
@@ -942,17 +945,22 @@ if __name__ == "__main__":
             # print(task_config)
             print('Male test')
             male_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=male_test_loader, N=N_MonteCarloSimulation)
-            mae_male, _, _ = male_monte_carlo.run_predictions()
+            mae_male, male_avg_alea, _ = male_monte_carlo.run_predictions()
 
             print('Female test')
             female_monte_carlo = MonteCarloPredictionRegression(model=model, dataloader=female_test_loader, N=N_MonteCarloSimulation)
-            mae_female, _, _ = female_monte_carlo.run_predictions()
+            mae_female, female_avg_alea, _ = female_monte_carlo.run_predictions()
 
             mae_males.append(mae_male)
             mae_females.append(mae_female)
+            male_avg_aleas.append(male_avg_alea)
+            female_avg_aleas.append(female_avg_alea)
         
         data_lists.append(mae_males)
         data_lists.append(mae_females)
+        data_lists.append(male_avg_aleas)
+        data_lists.append(female_avg_aleas)
+
     
-        write_to_csv(data_lists, column_names=["Male", "Female"], model_name=test_model+"neg_var", dataset_name="UTKFace")
+        write_to_csv(data_lists, column_names=["Male_MAE", "Female_MAE", "Male_AU", "Female_AU"], model_name=test_model+"neg_var", dataset_name="UTKFace")
 
